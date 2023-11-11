@@ -1186,29 +1186,41 @@ def view_purchasebill(request):
 
 
 def add_purchasebill(request):
+
+  toda = date.today()
+  tod = toda.strftime("%Y-%m-%d")
+  
   data = request.session.get('staffdata')
   data = json.loads(data)
   staff_data = data[0]['fields']
+
+  cust = party.objects.all()
+
+  cmp = company.objects.get(id=staff_data['company'])
+
+  allcmp = company.objects.all()
 
   staff =  staff_details.objects.get(company=staff_data['company'],first_name=staff_data['first_name'],last_name=staff_data['last_name'],
                                       email=staff_data['email'],user_name=staff_data['user_name'],password=staff_data['password'])
   allmodules= modules_list.objects.get(company=staff.company,status='New')
 
-  context = {'staff' : staff, 'allmodules':allmodules}
+  last_bill = PurchaseBill.objects.last()
 
+  if last_bill:
+    bill_no = last_bill.tot_bill_no + 1 
+
+  else:
+    bill_no = 1
+
+  context = {'staff' : staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'allcmp':allcmp}
+  
   return render(request,'staff/addpurchasebill.html',context)
 
 
 def bankdata(request):
     return render(request,'staff/addpurchasebill.html')
 
-def payment_term_for_sales(request):
-    return render(request,'staff/addpurchasebill.html')
-
-def terms_dropdowns(request):
-    return render(request,'staff/addpurchasebill.html')
-
-def customers21(request):
+def savecustomer(request):
     return render(request,'staff/addpurchasebill.html')
 
 def cust_dropdown(request):

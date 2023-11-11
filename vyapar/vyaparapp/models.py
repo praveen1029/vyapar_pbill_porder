@@ -142,13 +142,13 @@ class TransactionModel(models.Model):
 
 
 class PurchaseBill(models.Model):
-    billid = models.AutoField(('BILLID'), primary_key=True)
+    billno = models.AutoField(('BILLID'), primary_key=True)
     company = models.ForeignKey(company, on_delete=models.CASCADE)
     partyname = models.CharField(max_length=100)
     email = models.CharField(max_length=100, default='')
-    billno = models.CharField(max_length=100)
     billdate = models.DateField()
     duedate = models.DateField()
+    phno = models.CharField(max_length=255, default='')
     address = models.CharField(max_length=255, default='')
     supplystate = models.CharField(max_length=100, default='')
     pay_method = models.CharField(max_length=255, default='', null=True)
@@ -164,7 +164,7 @@ class PurchaseBill(models.Model):
     grandtotal = models.FloatField(default=0, null=True)
     advance=models.CharField(null=True,blank=True,max_length=255)
     balance=models.CharField(null=True,blank=True,max_length=255)
-    tot_inv_no = models.IntegerField(default=0, null=True)
+    tot_bill_no = models.IntegerField(default=0, null=True)
 
 class PurchaseBillItem(models.Model):
     purchasebill = models.ForeignKey(PurchaseBill,on_delete=models.CASCADE)
