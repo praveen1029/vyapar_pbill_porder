@@ -10,7 +10,7 @@ from django.utils.crypto import get_random_string
 from datetime import date
 from datetime import timedelta
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q,F
 from django.template.response import TemplateResponse
 from django.core.serializers import serialize
 
@@ -1171,18 +1171,16 @@ def view_purchasebill(request):
   data = json.loads(data)
   staff_data = data[0]['fields']
 
-  pbill = PurchaseBill.objects.filter(company=staff_data['company'])
+  staff =  staff_details.objects.get(id=data[0]['pk'])
+  allmodules= modules_list.objects.get(company=staff.company,status='New')
+  pbill = PurchaseBill.objects.filter(staff=staff.id, company=staff_data['company'])
 
   if not pbill:
-    staff =  staff_details.objects.get(company=staff_data['company'],first_name=staff_data['first_name'],last_name=staff_data['last_name'],
-                                       email=staff_data['email'],user_name=staff_data['user_name'],password=staff_data['password'])
-    allmodules= modules_list.objects.get(company=staff.company,status='New')
-
-    context = {'staff' : staff, 'allmodules':allmodules}
-
+    context = {'staff':staff, 'allmodules':allmodules}
     return render(request,'staff/emptypurchasebill.html',context)
   
-  return render(request,'staff/purchasebill.html')
+  context = {'staff':staff,'allmodules':allmodules,'pbill':pbill}
+  return render(request,'staff/purchasebill.html',context)
 
 
 def add_purchasebill(request):
@@ -1198,8 +1196,6 @@ def add_purchasebill(request):
 
   cmp = company.objects.get(id=staff_data['company'])
 
-  allcmp = company.objects.all()
-
   staff =  staff_details.objects.get(company=staff_data['company'],first_name=staff_data['first_name'],last_name=staff_data['last_name'],
                                       email=staff_data['email'],user_name=staff_data['user_name'],password=staff_data['password'])
   allmodules= modules_list.objects.get(company=staff.company,status='New')
@@ -1212,19 +1208,128 @@ def add_purchasebill(request):
   else:
     bill_no = 1
 
-  context = {'staff' : staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'allcmp':allcmp}
+  item = ItemModel.objects.all()
+
+  context = {'staff' : staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'item':item}
   
   return render(request,'staff/addpurchasebill.html',context)
+
+
+def create_purchasebill(request):
+  if request.method == 'POST': 
+
+    data = request.session.get('staffdata')
+    data = json.loads(data)
+    staff_data = data[0]['fields']
+
+    staff = staff_details.objects.get(id=data[0]['pk'])
+
+    cmp = company.objects.get(id=staff_data['company'])    
+    part = party.objects.get(id=request.POST.get('customername'))
+    pbill = PurchaseBill(party=part, 
+                    billdate=request.POST.get('billdate'),
+                    supplypalce=request.POST.get('placosupply'),
+                    pay_method=request.POST.get("method"),
+                    cheque_no=request.POST.get("cheque_id"),
+                    upi_no=request.POST.get("upi_id"),
+                    bank_no=request.POST.get("bnk_id"),
+                    party_balance=request.POST.get('balin'),
+                    advance = request.POST.get("advance"),
+                    balance = request.POST.get("balance"),
+                    subtotal=float(request.POST.get('subtotal')),
+                    igst = request.POST.get('igst'),
+                    cgst = request.POST.get('cgst'),
+                    sgst = request.POST.get('sgst'),
+                    adjust = request.POST.get("adj"),
+                    taxamount = request.POST.get("taxamount"),
+                    grandtotal=request.POST.get('grandtotal'),
+                    company=cmp,staff=staff)
+    pbill.save()
+        
+    product = tuple(request.POST.getlist("product[]"))
+    hsn  =  tuple(request.POST.getlist("hsn[]"))
+    qty =  tuple(request.POST.getlist("qty[]"))
+    price =  tuple(request.POST.getlist("price[]"))
+    discount =  tuple(request.POST.getlist("discount[]"))
+    if request.POST.get('placosupply') =='State':
+      tax =  tuple(request.POST.getlist("tax1[]"))
+    else:
+      tax =  tuple(request.POST.getlist("tax2[]"))
+    total =  tuple(request.POST.getlist("total[]"))
+
+    billno = PurchaseBill.objects.get(billno =pbill.billno)
+    if len(product)==len(hsn)==len(qty)==len(price)==len(tax)==len(discount)==len(total):
+        mapped=zip(product,hsn, qty,price,tax,discount,total)
+        mapped=list(mapped)
+        for ele in mapped:
+            PurchaseBillItem.objects.create(product = ele[0],hsn=ele[1],qty=ele[2],
+            price=ele[3],tax=ele[4],discount=ele[5],total=ele[6],purchasebill=billno,company=cmp)
+
+        PurchaseBill.objects.all().update(tot_bill_no=F('tot_bill_no') + 1)
+        
+        last_bill = PurchaseBill.objects.last()
+        last_bill.tot_bill_no = last_bill.billno
+        last_bill.save()
+
+        if 'Next' in request.POST:
+          return redirect('add_purchasebill')
+        
+        if "Save" in request.POST:
+          return redirect('view_purchasebill')
+    else:
+        return render(request,'staff/addpurchasebill.html')
 
 
 def bankdata(request):
     return render(request,'staff/addpurchasebill.html')
 
 def savecustomer(request):
-    return render(request,'staff/addpurchasebill.html')
+  data = request.session.get('staffdata')
+  data = json.loads(data)
+  staff_data = data[0]['fields']
+
+  cmp = company.objects.get(id=staff_data['company'])
+
+  party_name = request.POST['name']
+  email = request.POST['email']
+  contact = request.POST['mobile']
+  state = request.POST['splystate']
+  address = request.POST['baddress']
+  gst_type = request.POST['gsttype']
+  gst_no = request.POST['gstin']
+  current_date = request.POST['partydate']
+  openingbalance = request.POST.get('openbalance')
+  payment = request.POST.get('paytype')
+  creditlimit = request.POST.get('credit_limit')
+  End_date = request.POST.get('enddate', None)
+  additionalfield1 = request.POST['add1']
+  additionalfield2 = request.POST['add2']
+  additionalfield3 = request.POST['add3']
+
+  part = party(party_name=party_name, gst_no=gst_no,contact=contact,gst_type=gst_type, state=state,address=address, email=email, openingbalance=openingbalance,
+                payment=payment,creditlimit=creditlimit,current_date=current_date,End_date=End_date,additionalfield1=additionalfield1,additionalfield2=additionalfield2,
+                additionalfield3=additionalfield3,company=cmp,user=cmp.user)
+  part.save() 
+  print('here')
+  return JsonResponse({'success': True})
 
 def cust_dropdown(request):
-    return render(request,'staff/addpurchasebill.html')
+  data = request.session.get('staffdata')
+  data = json.loads(data)
+  staff_data = data[0]['fields']
+  cmp = company.objects.get(id=staff_data['company'])
+  part = party.objects.filter(company=cmp)
+
+  id_list = []
+  party_list = []
+  for p in part:
+    id_list.append(p.id)
+    party_list.append(p.party_name)
+
+  print(id_list)
+  print(party_list)
+
+  return JsonResponse({'id_list':id_list, 'party_list':party_list })
 
 def credit_item(request):
     return render(request,'staff/addpurchasebill.html')
@@ -1233,11 +1338,24 @@ def item_dropdown(request):
     return render(request,'staff/addpurchasebill.html')
 
 def custdata(request):
-    return render(request,'staff/addpurchasebill.html')
+  cid = request.POST['id']
+  part = party.objects.get(id=cid)
+  email = part.email
+  phno = part.contact
+  address = part.address
+  pay = part.payment
+  bal = part.openingbalance
+  return JsonResponse({'email':email, 'phno':phno, 'address':address, 'pay':pay, 'bal':bal})
 
 def itemdetails(request):
-    return render(request,'staff/addpurchasebill.html')
-
+  itmid = request.GET['id']
+  itm = ItemModel.objects.get(id=itmid)
+  hsn = itm.item_hsn
+  gst = itm.item_gst
+  igst = itm.item_igst
+  price = itm.item_purchase_price
+  qty = itm.item_current_stock
+  return JsonResponse({'hsn':hsn, 'gst':gst, 'igst':igst, 'price':price, 'qty':qty})
 
 
 def view_purchaseorder(request):

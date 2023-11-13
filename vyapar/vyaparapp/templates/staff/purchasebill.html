@@ -1,11 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    hello
-</body>
-</html>
+{% extends 'staff/staffbase.html' %}
+{% load static %}
+{% block content %}
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+{% load my_extras %}
+
+<style>
+    .bs{
+        box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.397);
+    }
+    .bs_sm{
+        box-shadow: inset 2px 2px 5px 3px rgba(0, 0, 0, 0.199);
+    }
+    .tb{
+        color: black;
+    }
+    .tg{
+        color: rgb(0, 140, 7);
+    }
+    .tr{
+        color: rgb(218, 0, 0);
+    }
+    .btn_add{
+        background-color: orange;
+        color: black;
+    }
+    .btn_add:hover{
+        background-color: rgb(234, 152, 0);
+        color: black;
+    }
+    ::-webkit-scrollbar{
+        display: none
+    }
+    .bg-pink{
+        background-color: rgb(239, 3, 82)
+    }
+ 
+
+</style>
+
+
+<div class="body-wrapper">
+    <br><br><br>
+    
+
+    <br>
+    <div class="row ps-3 pe-3 m-0" >
+        <div class="col-sm-12 ps-2 pe-3">
+       
+            <!-- <div class="row" style="height: 0.5rem;"></div> -->
+            <div class="row pt-0 m-0">
+                <div class="card p-0 bg-light bs" style="height: 36rem;">
+                    <div class="row m-0 p-0 pt-3">
+                        <div class="col-sm-12 col-lg-3">
+                            <p class="tb fw-bolder pt-2">PURCHASE BILLS</p>
+                        </div>
+
+                        <div class="col-sm-12 col-lg-3">
+                            
+                        </div>
+                        <a href="{% url 'add_purchasebill' %}" style="color: black;">+ Add</a>
+                        
+                            <div class="mt-3" style="overflow: scroll;height: 31rem;">
+                                <table class="table" id="partiessearch">
+                                    <thead>
+                                        <tr class="fs-2 tb">
+                                            <th>DATE</th>
+                                            <th>BILL NO</th>
+                                            <th>PARTY NAME</th>
+                                            <th>PAYMENT TYPE</th>
+                                            <th>AMOUNT</th>
+                                            <th>BALANCE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p in pbill %}
+                                        <tr>
+                                            <td style="color: black;">{{p.billdate}}</td>
+                                            <td style="color: black;">{{p.billno}}</td>
+                                            <td style="color: black;">{{p.party.party_name}}</td>
+                                            <td style="color: black;">{{p.pay_method}}</td>
+                                            <td style="color: black;">{{p.grandtotal}}</td>
+                                            <td style="color: black;">{{p.party_balance}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDropdown(dotsElement) {
+        var dropdownMenu = dotsElement.nextElementSibling;
+        if (dropdownMenu.style.display === 'block' || dropdownMenu.style.display === '') {
+            dropdownMenu.style.display = 'none';
+        } else {
+            dropdownMenu.style.display = 'block';
+
+            // Close the dropdown if the user clicks outside of it
+            window.addEventListener('click', function (event) {
+                if (event.target !== dotsElement && event.target !== dropdownMenu) {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        }
+
+        // Prevent the click event from propagating to the window
+        event.stopPropagation();
+    }
+
+    $(document).ready(function () {
+        var $rows = $('#partysearch tbody tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.hide().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return ~text.indexOf(val);
+            }).show();
+        });
+    });
+
+
+    $(document).ready(function () {
+        var $rows = $('#partiessearch tbody tr');
+        $('#search1').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.hide().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return ~text.indexOf(val);
+            }).show();
+        });
+    });
+
+</script>
+
+</script>
+
+{% endblock  %}

@@ -118,8 +118,9 @@ urlpatterns = [
 
     path('view_purchasebill',views.view_purchasebill,name='view_purchasebill'),
     path('add_purchasebill',views.add_purchasebill,name='add_purchasebill'), 
-    path('bankdata',views.bankdata,name='bankdata'), 
     path('view_purchaseorder',views.view_purchaseorder,name='view_purchaseorder'),
+    path('create_purchasebill',views.create_purchasebill,name='create_purchasebill'),
+    path('bankdata',views.bankdata,name='bankdata'), 
     path('savecustomer',views.savecustomer,name='savecustomer'),
     path('cust_dropdown',views.cust_dropdown,name='cust_dropdown'),
     path('credit_item',views.credit_item,name='credit_item'),
