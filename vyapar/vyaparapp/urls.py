@@ -120,13 +120,15 @@ urlpatterns = [
     path('add_purchasebill',views.add_purchasebill,name='add_purchasebill'), 
     path('view_purchaseorder',views.view_purchaseorder,name='view_purchaseorder'),
     path('create_purchasebill',views.create_purchasebill,name='create_purchasebill'),
+    path('edit_purchasebill/<int:id>',views.edit_purchasebill,name='edit_purchasebill'),
     path('bankdata',views.bankdata,name='bankdata'), 
     path('savecustomer',views.savecustomer,name='savecustomer'),
     path('cust_dropdown',views.cust_dropdown,name='cust_dropdown'),
-    path('credit_item',views.credit_item,name='credit_item'),
+    path('new_item',views.new_item,name='new_item'),
     path('item_dropdown',views.item_dropdown,name='item_dropdown'),
     path('custdata',views.custdata,name='custdata'),
     path('itemdetails',views.itemdetails,name='itemdetails'),
+    path('stockdata',views.stockdata,name='stockdata'),
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     

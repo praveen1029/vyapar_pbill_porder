@@ -1162,7 +1162,6 @@ def deleteparty(request,id):
 
 #End
 
-
 def view_purchasebill(request):
   # use session savedin login view to get data of currently logged in staff
   data = request.session.get('staffdata')
@@ -1192,12 +1191,11 @@ def add_purchasebill(request):
   data = json.loads(data)
   staff_data = data[0]['fields']
 
-  cust = party.objects.all()
-
   cmp = company.objects.get(id=staff_data['company'])
+  cust = party.objects.filter(company=cmp,user=cmp.user)
 
   staff =  staff_details.objects.get(company=staff_data['company'],first_name=staff_data['first_name'],last_name=staff_data['last_name'],
-                                      email=staff_data['email'],user_name=staff_data['user_name'],password=staff_data['password'])
+                                      email=staff_data['email'],user_name=staff_data['user_name'])
   allmodules= modules_list.objects.get(company=staff.company,status='New')
 
   last_bill = PurchaseBill.objects.last()
@@ -1208,10 +1206,10 @@ def add_purchasebill(request):
   else:
     bill_no = 1
 
-  item = ItemModel.objects.all()
+  item = ItemModel.objects.filter(company=cmp,user=cmp.user)
+  item_units = UnitModel.objects.filter(user=cmp.user,company=staff_data['company'])
 
-  context = {'staff' : staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'item':item}
-  
+  context = {'staff':staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'item':item, 'item_units':item_units}
   return render(request,'staff/addpurchasebill.html',context)
 
 
@@ -1233,7 +1231,6 @@ def create_purchasebill(request):
                     cheque_no=request.POST.get("cheque_id"),
                     upi_no=request.POST.get("upi_id"),
                     bank_no=request.POST.get("bnk_id"),
-                    party_balance=request.POST.get('balin'),
                     advance = request.POST.get("advance"),
                     balance = request.POST.get("balance"),
                     subtotal=float(request.POST.get('subtotal')),
@@ -1280,8 +1277,28 @@ def create_purchasebill(request):
         return render(request,'staff/addpurchasebill.html')
 
 
+def edit_purchasebill(request,id):
+  data = request.session.get('staffdata')
+  data = json.loads(data)
+  staff_data = data[0]['fields']
+
+  cmp = company.objects.get(id=staff_data['company'])
+  cust = party.objects.filter(company=cmp,user=cmp.user)
+  item = ItemModel.objects.filter(company=cmp,user=cmp.user)
+  item_units = UnitModel.objects.filter(user=cmp.user,company=staff_data['company'])
+
+  staff =  staff_details.objects.get(id=data[0]['pk'])
+  allmodules= modules_list.objects.get(company=staff.company,status='New')
+  pbill = PurchaseBill.objects.get(billno=id)
+  billprd = PurchaseBillItem.objects.filter(purchasebill=id)
+
+  context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 'cust':cust, 'item':item, 'item_units':item_units}
+  return render(request,'staff/editpurchasebill.html',context)
+
+
 def bankdata(request):
     return render(request,'staff/addpurchasebill.html')
+
 
 def savecustomer(request):
   data = request.session.get('staffdata')
@@ -1310,15 +1327,15 @@ def savecustomer(request):
                 payment=payment,creditlimit=creditlimit,current_date=current_date,End_date=End_date,additionalfield1=additionalfield1,additionalfield2=additionalfield2,
                 additionalfield3=additionalfield3,company=cmp,user=cmp.user)
   part.save() 
-  print('here')
   return JsonResponse({'success': True})
+
 
 def cust_dropdown(request):
   data = request.session.get('staffdata')
   data = json.loads(data)
   staff_data = data[0]['fields']
   cmp = company.objects.get(id=staff_data['company'])
-  part = party.objects.filter(company=cmp)
+  part = party.objects.filter(company=cmp,user=cmp.user)
 
   id_list = []
   party_list = []
@@ -1326,16 +1343,49 @@ def cust_dropdown(request):
     id_list.append(p.id)
     party_list.append(p.party_name)
 
-  print(id_list)
-  print(party_list)
-
   return JsonResponse({'id_list':id_list, 'party_list':party_list })
 
-def credit_item(request):
-    return render(request,'staff/addpurchasebill.html')
+
+def new_item(request):
+  data = request.session.get('staffdata')
+  data = json.loads(data)
+  staff_data = data[0]['fields']
+
+  cmp = company.objects.get(id=staff_data['company'])
+
+  name = request.POST['name']
+  unit = request.POST['unit']
+  hsn = request.POST['hsn']
+  taxref = request.POST['taxref']
+  sell_price = request.POST['sell_price']
+  cost_price = request.POST['cost_price']
+  intra_st = request.POST['intra_st']
+  inter_st = request.POST['inter_st']
+  itmdate = request.POST.get('itmdate')
+  stock = request.POST.get('stock')
+  itmprice = request.POST.get('itmprice')
+  minstock = request.POST.get('minstock')
+
+  itm = ItemModel(item_name=name, item_hsn=hsn,item_unit=unit,item_taxable=taxref, item_gst=intra_st,item_igst=inter_st, item_sale_price=sell_price, 
+                item_purchase_price=cost_price,item_opening_stock=stock,item_current_stock=stock,item_at_price=itmprice,item_date=itmdate,
+                item_min_stock_maintain=minstock,company=cmp,user=cmp.user)
+  itm.save() 
+  return JsonResponse({'success': True})
+
 
 def item_dropdown(request):
-    return render(request,'staff/addpurchasebill.html')
+  data = request.session.get('staffdata')
+  data = json.loads(data)
+  staff_data = data[0]['fields']
+  cmp = company.objects.get(id=staff_data['company'])
+
+  options = {}
+  option_objects = ItemModel.objects.filter(company=cmp,user=cmp.user)
+  for option in option_objects:
+      options[option.id] = [option.item_name]
+
+  return JsonResponse(options)
+
 
 def custdata(request):
   cid = request.POST['id']
@@ -1347,6 +1397,7 @@ def custdata(request):
   bal = part.openingbalance
   return JsonResponse({'email':email, 'phno':phno, 'address':address, 'pay':pay, 'bal':bal})
 
+
 def itemdetails(request):
   itmid = request.GET['id']
   itm = ItemModel.objects.get(id=itmid)
@@ -1356,6 +1407,10 @@ def itemdetails(request):
   price = itm.item_purchase_price
   qty = itm.item_current_stock
   return JsonResponse({'hsn':hsn, 'gst':gst, 'igst':igst, 'price':price, 'qty':qty})
+
+
+def stockdata(request):
+  return render(request,'staff/addpurchasebill.html')
 
 
 def view_purchaseorder(request):
