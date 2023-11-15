@@ -10,33 +10,50 @@
     .bs{
         box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.397);
     }
+
     .bs_sm{
         box-shadow: inset 2px 2px 5px 3px rgba(0, 0, 0, 0.199);
     }
-    .tb{
+
+    .paiddiv{
         color: black;
+        height: 10vh;
+        width: 20vh;
+        padding-left: 2vh;
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+        border: 2px solid black;
+        margin-left: 7vh;
+        border-radius: 8px;
     }
-    .tg{
-        color: rgb(0, 140, 7);
-    }
-    .tr{
-        color: rgb(218, 0, 0);
-    }
-    .btn_add{
-        background-color: orange;
+
+    .unpaiddiv{
         color: black;
+        height: 10vh;
+        width: 20vh;
+        padding-left: 2vh;
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+        border: 2px solid black;
+        margin-left: 7vh;
+        border-radius: 8px;
     }
-    .btn_add:hover{
-        background-color: rgb(234, 152, 0);
+
+    .totaldiv{
         color: black;
+        height: 10vh;
+        width: 20vh;
+        padding-left: 2vh;
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+        border: 2px solid black;
+        margin-left: 7vh;
+        border-radius: 8px;
     }
+    
     ::-webkit-scrollbar{
         display: none
     }
-    .bg-pink{
-        background-color: rgb(239, 3, 82)
-    }
- 
 
 </style>
 
@@ -44,17 +61,87 @@
 <div class="body-wrapper">
     <br><br><br>
     
-
-    <br>
+    <div class="d-flex justify-content-center pt-4">
+        <a href="" id="b1" class="btn  text-white"
+            style="margin-right: 10px; background-color: rgb(252, 3, 3,0.7);border-radius: 20px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+            Add Sale <i class="fa fa-plus"></i>
+        </a>
+        <a href="" id="b2" class="btn  text-white"
+            style="margin-right: 10px;background-color: rgba(3, 161, 252, 0.7);border-radius: 20px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+            Add Purchase <i class="fa fa-plus"></i>
+        </a>
+        <a href="" id="b3" class="btn text-primary"
+            style="border-radius: 20px;border: 1px solid rgb(40, 12, 222);background-color: white;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+            Add More <i class="fa fa-plus"></i>
+        </a>
+    </div>
+    <p></p>
     <div class="row ps-3 pe-3 m-0" >
         <div class="col-sm-12 ps-2 pe-3">
        
-            <!-- <div class="row" style="height: 0.5rem;"></div> -->
+            <div class="row pt-0 m-0">
+                <div class="card p-0 bg-light bs"><br>
+                    <div class="row">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-3" style="margin-left: 7vh;">
+                                    <div class="form-group">
+                                        <label for="fromDate" style="color: black; margin-bottom: 1vh;">From Date:</label>
+                                        <input type="date" class="form-control h-100 border-secondary" id="fromDate" style="color: black; background-color: white;"> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="toDate" style="color: black; margin-bottom: 1vh;">To Date:</label>
+                                        <input type="date" class="form-control h-100 border-secondary" id="toDate" style="color: black; background-color: white;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3"></div>
+                                <div class="col-md-2 text-right" style="margin-left: 6vh;">
+                                    <button class="btn mt-3 " type="button" onclick="ExportToExcel()">
+                                        <span><img width="22px" src="{% static 'assets/excel2.png' %}" alt="no img"></span>
+                                        <br><span style="color: black; font-size: small; font-weight: bold;">Excel</span>
+                                    </button>
+
+                                    <button class="btn mt-3" type="button" onclick="ExportToExcel()">
+                                        <i class="fa fa-print" aria-hidden="true" style="font-size:22px"></i>
+                                        <br><span style="color: black; font-size: small; font-weight: bold;">Print</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><br>
+
+                    <div class="row">
+                        <div class="col-md-12 d-flex">
+                            <div class="paiddiv">
+                                Paid <br>
+                                <span style="font-size:x-large;"> &#8377; <span class="paidval"></span></span>
+                                
+                            </div>
+                               +
+                            <div class="unpaiddiv">
+                                Unpaid <br>
+                                <span style="font-size:x-large;"> &#8377; <span class="unpaidval"></span></span>
+                            </div>
+                                =
+                            <div class="totaldiv">
+                                Total <br>
+                                <span style="font-size:x-large;"> &#8377; <span class="totalval"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            </div>
+
+
+
             <div class="row pt-0 m-0">
                 <div class="card p-0 bg-light bs" style="height: 36rem;">
                     <div class="row m-0 p-0 pt-3">
                         <div class="col-sm-12 col-lg-3">
-                            <p class="tb fw-bolder pt-2">PURCHASE BILLS</p>
+                            <h4 class="tb fw-bolder pt-2 text-secondary">PURCHASE BILLS</h4>
                         </div>
 
                         <div class="col-sm-12 col-lg-3">
@@ -64,7 +151,7 @@
                         <a href="{% url 'edit_purchasebill' 5 %}" style="color: black;">+ Edit</a>
                         
                             <div class="mt-3" style="overflow: scroll;height: 31rem;">
-                                <table class="table" id="partiessearch">
+                                <table class="table" id="billtable">
                                     <thead>
                                         <tr class="fs-2 tb">
                                             <th>DATE</th>
@@ -83,7 +170,7 @@
                                             <td style="color: black;">{{p.party.party_name}}</td>
                                             <td style="color: black;">{{p.pay_method}}</td>
                                             <td style="color: black;">{{p.grandtotal}}</td>
-                                            <td style="color: black;">{{p.party_balance}}</td>
+                                            <td style="color: black;">{{p.party.openingbalance}}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -98,52 +185,23 @@
 </div>
 
 <script>
-    function toggleDropdown(dotsElement) {
-        var dropdownMenu = dotsElement.nextElementSibling;
-        if (dropdownMenu.style.display === 'block' || dropdownMenu.style.display === '') {
-            dropdownMenu.style.display = 'none';
-        } else {
-            dropdownMenu.style.display = 'block';
-
-            // Close the dropdown if the user clicks outside of it
-            window.addEventListener('click', function (event) {
-                if (event.target !== dotsElement && event.target !== dropdownMenu) {
-                    dropdownMenu.style.display = 'none';
-                }
-            });
+    var fromDateInput = document.getElementById("fromDate");
+    var toDateInput = document.getElementById("toDate");
+    var table = document.getElementById("billtable");
+    toDateInput.addEventListener("change", filterTable);
+  
+    function filterTable() {
+        var fromDate = new Date(fromDateInput.value);
+        var toDate = new Date(toDateInput.value);
+        for (var i = 1; i < table.rows.length; i++) {
+            var rowDate = new Date(table.rows[i].cells[0].textContent);
+            if (rowDate >= fromDate && rowDate <= toDate) {
+                table.rows[i].style.display = "";
+            } else {
+                table.rows[i].style.display = "none";
+            }
         }
-
-        // Prevent the click event from propagating to the window
-        event.stopPropagation();
     }
-
-    $(document).ready(function () {
-        var $rows = $('#partysearch tbody tr');
-        $('#search').keyup(function () {
-            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
-
-            $rows.hide().filter(function () {
-                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
-                return ~text.indexOf(val);
-            }).show();
-        });
-    });
-
-
-    $(document).ready(function () {
-        var $rows = $('#partiessearch tbody tr');
-        $('#search1').keyup(function () {
-            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
-
-            $rows.hide().filter(function () {
-                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
-                return ~text.indexOf(val);
-            }).show();
-        });
-    });
-
-</script>
-
 </script>
 
 {% endblock  %}

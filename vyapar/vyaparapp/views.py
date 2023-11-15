@@ -1244,9 +1244,7 @@ def create_purchasebill(request):
     pbill.save()
         
     product = tuple(request.POST.getlist("product[]"))
-    hsn  =  tuple(request.POST.getlist("hsn[]"))
     qty =  tuple(request.POST.getlist("qty[]"))
-    price =  tuple(request.POST.getlist("price[]"))
     discount =  tuple(request.POST.getlist("discount[]"))
     if request.POST.get('placosupply') =='State':
       tax =  tuple(request.POST.getlist("tax1[]"))
@@ -1255,13 +1253,11 @@ def create_purchasebill(request):
     total =  tuple(request.POST.getlist("total[]"))
 
     billno = PurchaseBill.objects.get(billno =pbill.billno)
-    if len(product)==len(hsn)==len(qty)==len(price)==len(tax)==len(discount)==len(total):
-        mapped=zip(product,hsn, qty,price,tax,discount,total)
+    if len(product)==len(qty)==len(tax)==len(discount)==len(total):
+        mapped=zip(product,qty,tax,discount,total)
         mapped=list(mapped)
         for ele in mapped:
-            PurchaseBillItem.objects.create(product = ele[0],hsn=ele[1],qty=ele[2],
-            price=ele[3],tax=ele[4],discount=ele[5],total=ele[6],purchasebill=billno,company=cmp)
-
+            PurchaseBillItem.objects.create(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchasebill=billno,company=cmp)
         PurchaseBill.objects.all().update(tot_bill_no=F('tot_bill_no') + 1)
         
         last_bill = PurchaseBill.objects.last()
@@ -1294,6 +1290,77 @@ def edit_purchasebill(request,id):
 
   context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 'cust':cust, 'item':item, 'item_units':item_units}
   return render(request,'staff/editpurchasebill.html',context)
+
+
+def update_purchasebill(request,id):
+  if request.method =='POST':
+        
+    data = request.session.get('staffdata')
+    data = json.loads(data)
+    staff_data = data[0]['fields']
+
+    staff = staff_details.objects.get(id=data[0]['pk'])
+    cmp = company.objects.get(id=staff_data['company'])  
+    part = party.objects.get(id=request.POST.get('customername'))
+
+    pbill = PurchaseBill.objects.get(billno=id,company=cmp,staff=staff)
+    pbill.party = part
+    pbill.billdate = request.POST.get('billdate')
+    pbill.supplypalce = request.POST.get('placosupply')
+    pbill.subtotal =float(request.POST.get('subtotal'))
+    pbill.grandtotal = request.POST.get('grandtotal')
+    pbill.igst = request.POST.get('igst')
+    pbill.cgst = request.POST.get('cgst')
+    pbill.sgst = request.POST.get('sgst')
+    pbill.taxamount = request.POST.get("taxamount")
+    pbill.adjust = request.POST.get("adj")
+    pbill.pay_method = request.POST.get("method")
+    pbill.cheque_no = request.POST.get("cheque_id")
+    pbill.upi_no = request.POST.get("upi_id")
+    pbill.bank_no = request.POST.get("bnk_id")
+    pbill.advance = request.POST.get("advance")
+    pbill.balance = request.POST.get("balance")
+
+    pbill.save()
+
+    product = tuple(request.POST.getlist("product[]"))
+    qty = tuple(request.POST.getlist("qty[]"))
+    if request.POST.get('placosupply') == 'State':
+            tax =tuple( request.POST.getlist("tax1[]"))
+    else:
+            tax = tuple(request.POST.getlist("tax2[]"))
+    total = tuple(request.POST.getlist("total[]"))
+    discount = tuple(request.POST.getlist("discount[]"))
+    itemid = request.POST.getlist("id[]")
+    item_ids = [int(id) for id in itemid]
+
+    pur= PurchaseBill.objects.get(billno =pbill.billno)
+    pur_item = PurchaseBillItem.objects.filter(purchasebill=pur)
+    object_ids = [obj.id for obj in pur_item]
+    ids_to_delete = [obj_id for obj_id in object_ids if obj_id not in item_ids]
+    PurchaseBillItem.objects.filter(id__in=ids_to_delete).delete()
+    count = PurchaseBillItem.objects.filter(purchasebill=pur).count()
+    if len(total)==len(discount)==len(qty)==len(tax)==len(total):
+      try:
+          mapped=zip(product,qty,tax,discount,total,item_ids)
+          mapped=list(mapped)
+          for ele in mapped:
+              if int(len(product))>int(count):
+                  if ele[5] == 0:
+                      itm = ItemModel.objects.get(id=ele[0])
+                      PurchaseBillItem.objects.create(product =itm,qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchasebill=pur,company=cmp)
+
+                  else:
+                      PurchaseBillItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
+              else:
+                  PurchaseBillItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
+      except:
+              mapped=zip(product,qty,tax,discount,total,item_ids)
+              mapped=list(mapped)
+              for ele in mapped:
+                  PurchaseBillItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
+
+  return redirect('view_purchasebill')
 
 
 def bankdata(request):
@@ -1346,7 +1413,7 @@ def cust_dropdown(request):
   return JsonResponse({'id_list':id_list, 'party_list':party_list })
 
 
-def new_item(request):
+def saveitem(request):
   data = request.session.get('staffdata')
   data = json.loads(data)
   staff_data = data[0]['fields']
@@ -1361,6 +1428,11 @@ def new_item(request):
   cost_price = request.POST['cost_price']
   intra_st = request.POST['intra_st']
   inter_st = request.POST['inter_st']
+
+  if intra_st != 'Taxable':
+    intra_st = 'GST0[0%]'
+    inter_st = 'IGST0[0%]'
+
   itmdate = request.POST.get('itmdate')
   stock = request.POST.get('stock')
   itmprice = request.POST.get('itmprice')
@@ -1407,10 +1479,6 @@ def itemdetails(request):
   price = itm.item_purchase_price
   qty = itm.item_current_stock
   return JsonResponse({'hsn':hsn, 'gst':gst, 'igst':igst, 'price':price, 'qty':qty})
-
-
-def stockdata(request):
-  return render(request,'staff/addpurchasebill.html')
 
 
 def view_purchaseorder(request):
