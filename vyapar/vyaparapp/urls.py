@@ -25,7 +25,7 @@ urlpatterns = [
     path('settings', views.settings, name='settings'),
     path('hide_options', views.hide_options, name='hide_options'),
 
-    path('staffhome/<id>', views.staffhome, name='staffhome'),
+    path('staffhome', views.staffhome, name='staffhome'),
     path('adminhome', views.adminhome, name='adminhome'),
     
     
@@ -122,6 +122,7 @@ urlpatterns = [
     path('create_purchasebill',views.create_purchasebill,name='create_purchasebill'),
     path('edit_purchasebill/<int:id>',views.edit_purchasebill,name='edit_purchasebill'),
     path('update_purchasebill/<int:id>',views.update_purchasebill,name='update_purchasebill'),
+    path('delete_purchasebill/<int:id>',views.delete_purchasebill,name='delete_purchasebill'),
     path('bankdata',views.bankdata,name='bankdata'), 
     path('savecustomer',views.savecustomer,name='savecustomer'),
     path('cust_dropdown',views.cust_dropdown,name='cust_dropdown'),

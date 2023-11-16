@@ -268,7 +268,7 @@
                                                                 <option value="IGST28[28%]">IGST28[28%]</option>
                                                             </select>
                                                             <input type="text" style="display: none;" id="tax_percent1">
-                                                            <div class="mt-1" style=" text-align: center;color: red;" ><span id="invalidtax1" style="display: none;"> Invalid Tax %</span> </div>    
+                                                            <div class="mt-1" style=" text-align: center;color: red;" ><span id="invalidtax1" style="display: none;">Tax % Changed </span> </div>    
                                                         </td>
     
                                                         <td style="width: 10%;" >
@@ -1076,7 +1076,7 @@
                                 {% endfor %}
                             </select>&nbsp;&nbsp;&nbsp;
 
-                            <button id="modal_closing" type="button" class="btn bg-warning" data-bs-toggle="modal" data-bs-target="#newitem" data-bs-whatever="@mdo">
+                            <button id="modal_closing" type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#newitem" data-bs-whatever="@mdo">
                                 <span class="fa fa-plus"></span>
                             </button>
                         </div>
@@ -1119,7 +1119,7 @@
                             <option value="IGST28[28%]">IGST28[28%]</option>
                         </select>
                         <input type="text" style="display: none;" id="tax_percent${roinc}" >
-                        <div class="mt-1" style=" text-align: center;color: red;" ><span id="invalidtax${roinc}" style="display: none;"> Invalid Tax %</span> </div> 
+                        <div class="mt-1" style=" text-align: center;color: red;" ><span id="invalidtax${roinc}" style="display: none;"> Tax % Changed</span> </div> 
                     </td>  
 
                     <td tyle="width:10%">
@@ -1133,7 +1133,7 @@
                     <td style="display: none;"><input type="number" step="any" name='taxamount1' id="taxamount${roinc}" class="form-control border-secondary taxamount" /></td>
                     
                     <td style="width:13%">
-                        <button type="button" id="${roinc}" class="btn font-weight-bold bg-warning clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" style="background-color:rgb(88, 107, 143);"></button>
+                        <button type="button" id="${roinc}" class="btn btn-outline-info font-weight-bold clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" ></button>
                         <br>
                         <button type="button" id="${roinc}" class="btn btn-danger px-2 mx-1 py-1 remove_row fa fa-close"></button>
                     </td>

@@ -12,7 +12,7 @@ from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q,F
 from django.template.response import TemplateResponse
-from django.core.serializers import serialize
+from datetime import datetime
 
 
 # Create your views here.
@@ -31,8 +31,15 @@ def homepage(request):
           }
   return render(request, 'company/homepage.html', context)
 
-def staffhome(request,id):
-  staff =  staff_details.objects.get(id=id)
+def staffhome(request):
+  if 'staff_id' in request.session:
+    if request.session.has_key('staff_id'):
+      staff_id = request.session['staff_id']
+           
+    else:
+      return redirect('/')
+  staff =  staff_details.objects.get(id=staff_id)
+
   allmodules= modules_list.objects.get(company=staff.company,status='New')
   context = {
               'staff' : staff,
@@ -40,6 +47,7 @@ def staffhome(request,id):
 
           }
   return render(request, 'staff/staffhome.html', context)
+
 def adminhome(request):
  
   
@@ -664,9 +672,13 @@ def login(request):
     elif staff_details.objects.filter(user_name=user_name,password=passw).exists(): 
       data=staff_details.objects.get(user_name=user_name,password=passw)
       if data.Action == 1:
-        serialized_data = serialize('json', [data])
-        request.session['staffdata'] = serialized_data
-        return redirect('staffhome',data.id)  
+        request.session["staff_id"]=data.id
+        if 'staff_id' in request.session:
+          if request.session.has_key('emp_id'):
+            request.session['staff_id']
+
+          print(request.session['staff_id'])
+        return redirect('staffhome')  
       else:
         messages.info(request, 'Approval is Pending..')
         return redirect('log_page')
@@ -1163,16 +1175,10 @@ def deleteparty(request,id):
 #End
 
 def view_purchasebill(request):
-  # use session savedin login view to get data of currently logged in staff
-  data = request.session.get('staffdata')
-
-  # convert the session data into a dictionary
-  data = json.loads(data)
-  staff_data = data[0]['fields']
-
-  staff =  staff_details.objects.get(id=data[0]['pk'])
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
   allmodules= modules_list.objects.get(company=staff.company,status='New')
-  pbill = PurchaseBill.objects.filter(staff=staff.id, company=staff_data['company'])
+  pbill = PurchaseBill.objects.filter(staff=staff.id, company=staff.company)
 
   if not pbill:
     context = {'staff':staff, 'allmodules':allmodules}
@@ -1187,15 +1193,11 @@ def add_purchasebill(request):
   toda = date.today()
   tod = toda.strftime("%Y-%m-%d")
   
-  data = request.session.get('staffdata')
-  data = json.loads(data)
-  staff_data = data[0]['fields']
-
-  cmp = company.objects.get(id=staff_data['company'])
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
   cust = party.objects.filter(company=cmp,user=cmp.user)
 
-  staff =  staff_details.objects.get(company=staff_data['company'],first_name=staff_data['first_name'],last_name=staff_data['last_name'],
-                                      email=staff_data['email'],user_name=staff_data['user_name'])
   allmodules= modules_list.objects.get(company=staff.company,status='New')
 
   last_bill = PurchaseBill.objects.last()
@@ -1207,7 +1209,7 @@ def add_purchasebill(request):
     bill_no = 1
 
   item = ItemModel.objects.filter(company=cmp,user=cmp.user)
-  item_units = UnitModel.objects.filter(user=cmp.user,company=staff_data['company'])
+  item_units = UnitModel.objects.filter(user=cmp.user,company=staff.company)
 
   context = {'staff':staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'item':item, 'item_units':item_units}
   return render(request,'staff/addpurchasebill.html',context)
@@ -1216,13 +1218,11 @@ def add_purchasebill(request):
 def create_purchasebill(request):
   if request.method == 'POST': 
 
-    data = request.session.get('staffdata')
-    data = json.loads(data)
-    staff_data = data[0]['fields']
+    sid = request.session.get('staff_id')
 
-    staff = staff_details.objects.get(id=data[0]['pk'])
+    staff = staff_details.objects.get(id=sid)
 
-    cmp = company.objects.get(id=staff_data['company'])    
+    cmp = company.objects.get(id=staff.company.id)    
     part = party.objects.get(id=request.POST.get('customername'))
     pbill = PurchaseBill(party=part, 
                     billdate=request.POST.get('billdate'),
@@ -1257,7 +1257,9 @@ def create_purchasebill(request):
         mapped=zip(product,qty,tax,discount,total)
         mapped=list(mapped)
         for ele in mapped:
-            PurchaseBillItem.objects.create(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchasebill=billno,company=cmp)
+          itm = ItemModel.objects.get(id=ele[0])
+          PurchaseBillItem.objects.create(product = itm,qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchasebill=billno,company=cmp)
+
         PurchaseBill.objects.all().update(tot_bill_no=F('tot_bill_no') + 1)
         
         last_bill = PurchaseBill.objects.last()
@@ -1274,33 +1276,30 @@ def create_purchasebill(request):
 
 
 def edit_purchasebill(request,id):
-  data = request.session.get('staffdata')
-  data = json.loads(data)
-  staff_data = data[0]['fields']
+  sid = request.session.get('staff_id')
 
-  cmp = company.objects.get(id=staff_data['company'])
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
   cust = party.objects.filter(company=cmp,user=cmp.user)
   item = ItemModel.objects.filter(company=cmp,user=cmp.user)
-  item_units = UnitModel.objects.filter(user=cmp.user,company=staff_data['company'])
+  item_units = UnitModel.objects.filter(user=cmp.user,company=staff.company.id)
 
-  staff =  staff_details.objects.get(id=data[0]['pk'])
   allmodules= modules_list.objects.get(company=staff.company,status='New')
   pbill = PurchaseBill.objects.get(billno=id)
   billprd = PurchaseBillItem.objects.filter(purchasebill=id)
 
-  context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 'cust':cust, 'item':item, 'item_units':item_units}
+  bdate = pbill.billdate.strftime("%Y-%m-%d")
+  context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 'cust':cust, 'item':item, 'item_units':item_units, 'bdate':bdate}
   return render(request,'staff/editpurchasebill.html',context)
 
 
 def update_purchasebill(request,id):
   if request.method =='POST':
         
-    data = request.session.get('staffdata')
-    data = json.loads(data)
-    staff_data = data[0]['fields']
+    sid = request.session.get('staff_id')
 
-    staff = staff_details.objects.get(id=data[0]['pk'])
-    cmp = company.objects.get(id=staff_data['company'])  
+    staff = staff_details.objects.get(id=sid)
+    cmp = company.objects.get(id=staff.company.id)  
     part = party.objects.get(id=request.POST.get('customername'))
 
     pbill = PurchaseBill.objects.get(billno=id,company=cmp,staff=staff)
@@ -1326,9 +1325,9 @@ def update_purchasebill(request,id):
     product = tuple(request.POST.getlist("product[]"))
     qty = tuple(request.POST.getlist("qty[]"))
     if request.POST.get('placosupply') == 'State':
-            tax =tuple( request.POST.getlist("tax1[]"))
+      tax =tuple( request.POST.getlist("tax1[]"))
     else:
-            tax = tuple(request.POST.getlist("tax2[]"))
+      tax = tuple(request.POST.getlist("tax2[]"))
     total = tuple(request.POST.getlist("total[]"))
     discount = tuple(request.POST.getlist("discount[]"))
     itemid = request.POST.getlist("id[]")
@@ -1360,6 +1359,13 @@ def update_purchasebill(request,id):
               for ele in mapped:
                   PurchaseBillItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
 
+  return redirect('view_purchasebill')
+
+
+def delete_purchasebill(request,id):
+  pbill = PurchaseBill.objects.get(billno=id)
+  PurchaseBillItem.objects.get(purchasebill=pbill).delete()
+  pbill.delete()
   return redirect('view_purchasebill')
 
 
