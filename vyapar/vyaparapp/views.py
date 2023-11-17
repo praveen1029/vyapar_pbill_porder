@@ -1226,7 +1226,7 @@ def create_purchasebill(request):
     part = party.objects.get(id=request.POST.get('customername'))
     pbill = PurchaseBill(party=part, 
                     billdate=request.POST.get('billdate'),
-                    supplypalce=request.POST.get('placosupply'),
+                    supplyplace =request.POST.get('placosupply'),
                     pay_method=request.POST.get("method"),
                     cheque_no=request.POST.get("cheque_id"),
                     upi_no=request.POST.get("upi_id"),
@@ -1305,7 +1305,7 @@ def update_purchasebill(request,id):
     pbill = PurchaseBill.objects.get(billno=id,company=cmp,staff=staff)
     pbill.party = part
     pbill.billdate = request.POST.get('billdate')
-    pbill.supplypalce = request.POST.get('placosupply')
+    pbill.supplyplace  = request.POST.get('placosupply')
     pbill.subtotal =float(request.POST.get('subtotal'))
     pbill.grandtotal = request.POST.get('grandtotal')
     pbill.igst = request.POST.get('igst')
@@ -1367,6 +1367,96 @@ def delete_purchasebill(request,id):
   PurchaseBillItem.objects.get(purchasebill=pbill).delete()
   pbill.delete()
   return redirect('view_purchasebill')
+
+
+from openpyxl import load_workbook
+def import_purchase_bill(request):
+  if request.method == 'POST' and request.FILES['billfile']  and request.FILES['prdfile']:
+    sid = request.session.get('staff_id')
+    staff =  staff_details.objects.get(id=sid)
+    cmp = company.objects.get(id=staff.company.id)
+    totval = int(PurchaseBill.objects.last().tot_bill_no)
+
+    excel_bill = request.FILES['billfile']
+    excel_b = load_workbook(excel_bill)
+    eb = excel_b['Sheet1']
+    excel_prd = request.FILES['prdfile']
+    excel_p = load_workbook(excel_prd)
+    ep = excel_p['Sheet1']
+
+    for row_number1 in range(2, eb.max_row + 1):
+      billsheet = [eb.cell(row=row_number1, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+      part = party.objects.get(party_name=billsheet[0],email=billsheet[1],company=cmp)
+      PurchaseBill.objects.create(party=part, 
+                                  billdate=billsheet[2],
+                                  supplyplace =billsheet[3],
+                                  pay_method=billsheet[4],
+                                  tot_bill_no = totval+1,
+                                  company=cmp,staff=staff)
+      
+      pbill = PurchaseBill.objects.last()
+      if billsheet[4] == 'Cheque':
+        pbill.cheque_no = billsheet[5]
+      elif billsheet[4] == 'UPI':
+        pbill.upi_no = billsheet[5]
+      elif billsheet[4] == 'B':
+        pbill.bank_no = billsheet[5]
+      pbill.save()
+
+      PurchaseBill.objects.all().update(tot_bill_no=totval + 1)
+      totval += 1
+      subtotal = 0
+      taxamount=0
+      for row_number2 in range(2, ep.max_row + 1):
+        prdsheet = [ep.cell(row=row_number2, column=col_num).value for col_num in range(1, ep.max_column + 1)]
+        if prdsheet[0] == row_number1:
+          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=prdsheet[2])
+          temp = prdsheet[4].split('[')
+          if billsheet[3] =='State':
+            tax=int(temp[0][3:])
+          else:
+            tax=int(temp[0][4:])
+
+          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[5])
+          subtotal += total
+          tamount = total *(tax / 100)
+          taxamount += tamount 
+          PurchaseBillItem.objects.create(purchasebill=pbill,
+                                          company=cmp,
+                                          product=itm,
+                                          qty=prdsheet[3],
+                                          tax=prdsheet[4],
+                                          discount=prdsheet[5],
+                                          total=total)
+                
+          if billsheet[3]=='State':
+            gst = round((taxamount/2),2)
+            pbill.sgst=gst
+            pbill.cgst=gst
+            pbill.igst=0
+
+          else:
+            gst=round(taxamount,2)
+            pbill.igst=gst
+            pbill.cgst=0
+            pbill.sgst=0
+
+          gtotal = subtotal + taxamount + float(billsheet[6])
+          balance = gtotal- float(billsheet[7])
+          gtotal = round(gtotal,2)
+          balance = round(balance,2)
+
+          pbill.subtotal=round(subtotal,2)
+          pbill.taxamount=round(taxamount,2)
+          pbill.adjust=round(billsheet[6],2)
+          pbill.grandtotal=gtotal
+          pbill.advance=round(billsheet[7],2)
+          pbill.balance=balance
+          pbill.save()
+
+      return JsonResponse({'message': 'File uploaded successfully!'})
+  else:
+    return JsonResponse({'message': 'File upload Failed!'})
 
 
 def bankdata(request):

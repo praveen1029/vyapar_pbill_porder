@@ -143,7 +143,7 @@
                                             <br>
                                             <label class="col-form-label ">Place of Supply</label>
                                             <select type="text" class="form-control border-secondary" id="plosu" name="placosupply"  style="color: black;background-color: white;">
-                                                <option value="{{pbill.supplypalce}}" selected hidden>{{pbill.supplypalce}}</option>
+                                                <option value="{{pbill.supplyplace }}" selected hidden>{{pbill.supplyplace }}</option>
                                                 <option value="State">State</option>
                                                 <option value="Other State">Other State</option>
                                             </select>
@@ -271,7 +271,7 @@
                                                             <input type="text" id="intrataxval{{ forloop.counter }}" value="{{j.product.item_gst}}" hidden>
                                                             <input type="text" id="intertaxval{{ forloop.counter }}" value="{{j.product.item_igst}}" hidden>
                                                             <input type="text"  id="select_tax{{ forloop.counter }}" placeholder="Tax Rate" class="form-control seltax d-none">
-                                                            {% if pbill.supplypalce == 'State'  %}
+                                                            {% if pbill.supplyplace  == 'State'  %}
                                                                 <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-flex border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
                                                                     <option selected value="{{j.tax}}" hidden>{{j.tax}}</option>
                                                                     <option  value=" " hidden>Select Tax</option>
@@ -357,7 +357,7 @@
                                                         </div>
                                                         <div class="col-sm-4 m-0 p-0"></div>
                                                     </div>
-                                                    {% if pbill.supplypalce == 'State' %}
+                                                    {% if pbill.supplyplace  == 'State' %}
                                                         <div class="row container-fluid p-2 m-0" id="cgstdiv">
                                                             <div class="col-sm-4 mt-2"><label for="a" class="text-center">CGST</label></div>
                                                             <div class="col-sm-1 mt-2">:</div>
@@ -1322,6 +1322,14 @@
             $(this).val(originalRow.find('.inter_tax').val());
         });
         originalRow.after(clonedRow);
+        var table = document.getElementById('tab_logic');
+    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    // Iterate through each row and update the Sl No
+    for (var i = 0; i < rows.length; i++) {
+        var cells = rows[i].getElementsByTagName('td');
+        cells[0].innerText = i + 1;
+    }
         calc();
     });
 

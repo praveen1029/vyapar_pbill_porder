@@ -1231,6 +1231,14 @@
             $(this).val(originalRow.find('.inter_tax').val());
         });
         originalRow.after(clonedRow);
+        var table = document.getElementById('tab_logic');
+    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    // Iterate through each row and update the Sl No
+    for (var i = 0; i < rows.length; i++) {
+        var cells = rows[i].getElementsByTagName('td');
+        cells[0].innerText = i + 1;
+    }
         calc();
     });
 

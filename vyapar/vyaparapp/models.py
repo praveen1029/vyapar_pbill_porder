@@ -147,7 +147,7 @@ class PurchaseBill(models.Model):
     company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
     party = models.ForeignKey(party, on_delete=models.CASCADE)
     billdate = models.DateField()
-    supplypalce = models.CharField(max_length=100, default='')
+    supplyplace = models.CharField(max_length=100, default='')
     pay_method = models.CharField(max_length=255, default='', null=True)
     cheque_no = models.CharField(max_length=255, default='', null=True)
     upi_no = models.CharField(max_length=255, default='', null=True)
@@ -171,3 +171,14 @@ class PurchaseBillItem(models.Model):
     total = models.IntegerField(default=0, null=True)
     tax = models.CharField(max_length=100)
     discount = models.CharField(max_length=100,default=0, null=True)
+
+class PurchaseBillTransactionHistory(models.Model):
+    purchasebill = models.ForeignKey(PurchaseBill,on_delete=models.CASCADE)
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    CHOICES = [
+        ('Created', 'Created'),
+        ('Edited', 'Edited'),
+    ]
+    action = models.CharField(max_length=20, choices=CHOICES)
+    transactiondate = models.DateField(auto_now=True)
