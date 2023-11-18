@@ -178,7 +178,7 @@ class PurchaseBillTransactionHistory(models.Model):
     company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
     CHOICES = [
         ('Created', 'Created'),
-        ('Edited', 'Edited'),
+        ('Updated', 'Updated'),
     ]
     action = models.CharField(max_length=20, choices=CHOICES)
     transactiondate = models.DateField(auto_now=True)

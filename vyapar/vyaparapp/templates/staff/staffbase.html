@@ -202,7 +202,11 @@
                 {% if allmodules.Purchase_bills != Null %}
                   <a href="{% url 'view_purchasebill' %}" class="d-flex align-items-center gap-2 dropdown-item">
                     <!-- <i class="ti ti-mail fs-6"></i> -->
-                    <p class="mb-0 fs-3">Purchase Bills</p>
+                    <div class="d-flex">
+                      <p class="mb-0 fs-3">Purchase Bills</p>
+                      <a href="{% url 'add_purchasebill' %}"><i class="fa fa-plus text-dark" ></i></a>
+                    </div>
+                    
                   </a>
                   <hr>
                   {% endif %}
@@ -216,7 +220,10 @@
                   {% if allmodules.Purchase_order != Null %}
                   <a href="{% url 'view_purchaseorder' %}" class="d-flex align-items-center gap-2 dropdown-item">
                     <!-- <i class="ti ti-list-check fs-6"></i> -->
-                    <p class="mb-0 fs-3">Purchase Order</p>
+                    <div class="d-flex">
+                      <p class="mb-0 fs-3">Purchase Order</p>
+                      <a href="{% url 'add_purchaseorder' %}"><i class="fa fa-plus text-dark" ></i></a>
+                    </div>
                   </a>
                   <hr>
                   {% endif %}
