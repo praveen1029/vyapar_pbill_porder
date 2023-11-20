@@ -1197,6 +1197,7 @@ def add_purchasebill(request):
   staff =  staff_details.objects.get(id=sid)
   cmp = company.objects.get(id=staff.company.id)
   cust = party.objects.filter(company=cmp,user=cmp.user)
+  bank = BankModel.objects.filter(company=cmp,user=cmp.user)
   allmodules= modules_list.objects.get(company=staff.company,status='New')
   last_bill = PurchaseBill.objects.last()
 
@@ -1208,7 +1209,7 @@ def add_purchasebill(request):
   item = ItemModel.objects.filter(company=cmp,user=cmp.user)
   item_units = UnitModel.objects.filter(user=cmp.user,company=staff.company)
 
-  context = {'staff':staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'item':item, 'item_units':item_units}
+  context = {'staff':staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'bill_no':bill_no, 'tod':tod, 'item':item, 'item_units':item_units,'bank':bank}
   return render(request,'staff/purchasebilladd.html',context)
 
 
@@ -1224,7 +1225,6 @@ def create_purchasebill(request):
                           pay_method=request.POST.get("method"),
                           cheque_no=request.POST.get("cheque_id"),
                           upi_no=request.POST.get("upi_id"),
-                          bank_no=request.POST.get("bnk_id"),
                           advance = request.POST.get("advance"),
                           balance = request.POST.get("balance"),
                           subtotal=float(request.POST.get('subtotal')),
@@ -1274,19 +1274,18 @@ def create_purchasebill(request):
 
 def edit_purchasebill(request,id):
   sid = request.session.get('staff_id')
-
   staff =  staff_details.objects.get(id=sid)
   cmp = company.objects.get(id=staff.company.id)
   cust = party.objects.filter(company=cmp,user=cmp.user)
   item = ItemModel.objects.filter(company=cmp,user=cmp.user)
   item_units = UnitModel.objects.filter(user=cmp.user,company=staff.company.id)
-
+  bank = BankModel.objects.filter(company=cmp,user=cmp.user)
   allmodules= modules_list.objects.get(company=staff.company,status='New')
   pbill = PurchaseBill.objects.get(billno=id)
   billprd = PurchaseBillItem.objects.filter(purchasebill=id)
 
   bdate = pbill.billdate.strftime("%Y-%m-%d")
-  context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 'cust':cust, 'item':item, 'item_units':item_units, 'bdate':bdate}
+  context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 'cust':cust, 'item':item, 'item_units':item_units, 'bdate':bdate,'bank':bank}
   return render(request,'staff/purchasebilledit.html',context)
 
 
@@ -1310,7 +1309,6 @@ def update_purchasebill(request,id):
     pbill.pay_method = request.POST.get("method")
     pbill.cheque_no = request.POST.get("cheque_id")
     pbill.upi_no = request.POST.get("upi_id")
-    pbill.bank_no = request.POST.get("bnk_id")
     pbill.advance = request.POST.get("advance")
     pbill.balance = request.POST.get("balance")
 
@@ -1365,8 +1363,12 @@ def details_purchasebill(request,id):
   allmodules = modules_list.objects.get(company=staff.company,status='New')
   pbill = PurchaseBill.objects.get(billno=id)
   pitm = PurchaseBillItem.objects.filter(purchasebill=pbill)
+  dis = 0
+  for itm in pitm:
+    dis += int(itm.discount)
+  itm_len = len(pitm)
 
-  context={'staff':staff,'allmodules':allmodules,'pbill':pbill,'pitm':pitm}
+  context={'staff':staff,'allmodules':allmodules,'pbill':pbill,'pitm':pitm,'itm_len':itm_len,'dis':dis}
   return render(request,'staff/purchasebilldetails.html',context)
 
 
@@ -1408,7 +1410,6 @@ def import_purchase_bill(request):
       PurchaseBill.objects.create(party=part, 
                                   billdate=billsheet[2],
                                   supplyplace =billsheet[3],
-                                  pay_method=billsheet[4],
                                   tot_bill_no = totval+1,
                                   company=cmp,staff=staff)
       
@@ -1417,8 +1418,10 @@ def import_purchase_bill(request):
         pbill.cheque_no = billsheet[5]
       elif billsheet[4] == 'UPI':
         pbill.upi_no = billsheet[5]
-      elif billsheet[4] == 'B':
-        pbill.bank_no = billsheet[5]
+      else:
+        if billsheet[4] != 'Cash':
+          bank = BankModel.objects.get(bank_name=billsheet[4],company=cmp)
+          pbill.pay_method = bank
       pbill.save()
 
       PurchaseBill.objects.all().update(tot_bill_no=totval + 1)
@@ -1486,8 +1489,19 @@ def billhistory(request):
   return JsonResponse({'name':name,'action':action,'pid':pid})
 
 
+def view_purchaseorder(request):
+  return render(request,'staff/purchaseorderlist.html')
+
+
+def add_purchaseorder(request):
+  return render(request,'staff/purchaseorderlist.html')
+
+
 def bankdata(request):
-    return render(request,'staff/purchasebilladd.html')
+  bid = request.POST['id']
+  bank = BankModel.objects.get(id=bid) 
+  bank_no = bank.account_num
+  return JsonResponse({'bank_no':bank_no})
 
 
 def savecustomer(request):
@@ -1602,10 +1616,3 @@ def itemdetails(request):
   price = itm.item_purchase_price
   qty = itm.item_current_stock
   return JsonResponse({'hsn':hsn, 'gst':gst, 'igst':igst, 'price':price, 'qty':qty})
-
-
-def view_purchaseorder(request):
-  return render(request,'staff/purchaseorderlist.html')
-
-def add_purchaseorder(request):
-  return render(request,'staff/purchaseorderlist.html')

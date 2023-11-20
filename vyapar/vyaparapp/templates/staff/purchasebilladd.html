@@ -1,9 +1,13 @@
 {% extends 'staff/staffbase.html' %}
 {% block content %}
 {% load static %}
+
 <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <style>
     .card-body{
@@ -40,6 +44,10 @@
 
     .addnewrow:hover{
         background-color: violet;
+    }
+
+    #customerdetails, #productdetails{
+        cursor: pointer;
     }
 
     ::-webkit-scrollbar {
@@ -84,24 +92,9 @@
                                         </a>
                                     </div>
                                 </div>
-                                <div style="background-color: rgba(0, 195, 255, 0.205);" class="p-3 pb-0 mb-0">
-                                    <div class="">
-                                        <div class="row pb-0 mb-0">
-                                            <div id="customerdetails" class="col text-center pb-2" >
-                                                <a class="fw-bolder fs-4" style="color: gray;" >CUSTOMER DETAILS</a>
-                                            </div>
-                                            <div id="productdetails" class="col text-center pb-2" >
-                                                <a class="fw-bolder fs-4" style="color: gray;" >PRODUCT DETAILS</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="customer_div" style="background-color: rgba(144, 211, 117, 0.098); margin-left: .1px; margin-right: .51px;">
+                                <div id="customer_div" style="margin-left: .1px; margin-right: .51px;">
                                     <div class="row">
-                                        <div class="col-md-1"></div>
-
-                                        <div class="col-md-5">
+                                        <div class="col-md-4">
                                             <label class="col-form-label">Customer</label>
                                             <div class="d-flex">
                                                 <select name="customername" id="customer" class="form-control border-secondary" style="color: black;background-color: white;" >
@@ -119,40 +112,30 @@
                                             <div class="mt-1 d-flex" >
                                                 &nbsp;<span id="balancediv" style="display: none; color: black;"> Available Balance : <span id="balval"></span></span>
                                             </div>
-                                        </div>
-    
-                                        <div class="col-md-5" >
-                                            <label class="col-form-label">Bill No.</label>
-                                            <input type="text" class="form-control border-secondary" name="bill_no"  id="bill_no" value="{{bill_no}}"  style="color: black;background-color: white;" readonly>
-                                        </div>
-                                        <div class="col-md-1"></div>
-                                    </div>
 
-                                    <div class="row">
-                                        <div class="col-md-1"></div>
-                                        <div class="col-md-5">
                                             <label class="col-form-label" >Email </label>
                                             <input class="form-control border-secondary" name="email" required  id="cust_email"  style="color: black;background-color: white;" readonly>
                                         </div>
-                                        <div class="col-md-5">
-                                            <label class="col-form-label">Phone No. </label>
+                                        <div class="col-md-4">
+                                            <label class="col-form-label">Bill No.</label>
+                                            <input type="text" class="form-control border-secondary" name="bill_no"  id="bill_no" value="{{bill_no}}"  style="color: black;background-color: white;" readonly> <br>
+                                        
+                                            <label class="col-form-label" style="margin-top: 4px;" >Phone No. </label>
                                             <input class="form-control border-secondary" name="phno" required  id="cust_phno"  style="color: black;background-color: white;" readonly>
                                         </div>
-                                        <div class="col-md-1"></div>
-                                    </div>
-                                    <br>
-
-                                    <div class="row">
-                                        <div class="col-md-1"></div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-4">
                                             <label class="col-form-label">Billing Address</label>
                                             <textarea class="form-control border-secondary mb-3" name="bname" id="bname" rows="6" type="text" style="color: black;background-color: white;" readonly></textarea>
                                         </div>
-                                        <div class="col-md-5">
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
                                             <label class="col-form-label">Bill Date</label>
                                             <input type="date" class="form-control border-secondary" name="billdate" id="billdate"  style="color: black;background-color: white;" value='{{tod}}'>
                                             <br>
-
+                                        </div>
+                                        <div class="col-md-4">
                                             <label class="col-form-label ">Place of Supply</label>
                                             <select type="text" class="form-control border-secondary" id="plosu" name="placosupply"  style="color: black;background-color: white;">
                                                 <option value="" selected hidden>Select</option>
@@ -160,24 +143,22 @@
                                                 <option value="Other State">Other State</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-1"></div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-1"></div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-4">
                                             <label class="col-form-label">Payment Method</label>
                                             <select class="form-control border-secondary my-select" id="pay_method" name="method" style="color: black;background-color: white;">
                                                 <option value=" " selected hidden>Select</option>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Cheque">Cheque</option>
                                                 <option value="UPI">UPI</option>
-                                                {% for i in bank %}
-                                                <option value="{{i.bankname}}">{{i.bankname}}</option>
+                                                {% for b in bank %}
+                                                <option value="{{b.id}}">{{b.bank_name}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                        <div class="col-md-5">
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
                                             <div style="display:none;"  id="chequediv">
                                                 <label class="col-form-label" >Cheque ID</label>
                                                 <input type="text" class="form-control border-secondary" name="cheque_id" id="cheque_id" placeholder="Enter Cheque ID" style="color: black;background-color: white;">
@@ -193,18 +174,9 @@
                                                 <input type="text" class="form-control border-secondary" name="bnk_id" id="bnk_id" style="color: black;background-color: white;" readonly>
                                             </div>
                                         </div>
-                                        <div class="col-md-1"></div>
                                     </div>
                                     <br>
-
-                                    <div class="row">
-                                        <div class="col-md-1"></div>
-                                        <div class="col-md-5">
-                                            <button id="next_btn" class="btn btn-primary bg-gradient" type="button">NEXT</button>
-                                          </div>
-                                    </div>
-                                </div>
-                                <div id="product_div" style="background-color: rgba(144, 211, 117, 0.098); margin-left: .1px; margin-right: .51px;">
+                                
                                     <div class="row clearfix">
                                         <div class="col-md-12 table-responsive-md mt-3">
                                             <table class="table table-bordered table-hover  mt-3" id="tab_logic" >
@@ -304,9 +276,8 @@
                                         </div>
                                     </div>
     
-                                    <div class="row clearfix" style="margin-top:10px">
-                                        <div class="row">
-                                            <div class="col-md-1"></div>
+                                    <div class="clearfix" style="margin-top:10px">
+                                        <div class="row" style="margin-left: 2vh;" >
                                             <div class="col-md-5 table-responsive-md mt-3 " id="tab_logic_total" style=" color: black; border: 1px solid rgba(128, 128, 128, 0.6); margin-left: -2vh; background-color: rgba(0, 195, 255, 0.205); ">
                                                 <div class="p-3">
                                                     <div class="row container-fluid p-2 m-0">
@@ -375,8 +346,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row">
-                                            <div class="col-md-1"></div>
+                                        <div class="row" style="margin-left: 2vh;" > 
                                             <div class="col-md-5 table-responsive-md mt-3 " id="tab_logic_total" style="color: black; border: 1px solid rgba(128, 128, 128, 0.6); margin-left: -2vh; background-color: rgba(0, 195, 255, 0.205);">
                                                 <div class="p-3">
                                                     <div class="row container-fluid p-2 m-0">
@@ -403,7 +373,6 @@
                                     <div class="row">
                                         <div class="col-md-1 mt-4"></div>
                                         <div class="col-md-5 mt-3 d-flex" style="margin-left:5vh">
-                                            <button id="prev_btn" class="btn btn-primary bg-gradient  me-3" type="button">BACK</button>
                                             <input type="submit" class="btn btn-primary bg-gradient me-3" name="Next" value="SAVE & NEXT"></input> 
                                             <input type="submit" class="btn btn-primary bg-gradient" name="Save" value="SAVE"></input>
                                         </div>
@@ -711,56 +680,10 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
 <script>
     $(document).ready(function() {
         $('#customer').select2();
     });
-</script>
-
-<script>
-    $(document).ready(function(){
-        $('#customerdetails').css({'border-bottom': '3px solid rgba(0, 0, 0, 0.548)'})
-        $('#productdetails a').removeClass('text-dark')
-        $('#customerdetails a').addClass('text-dark')
-        $('#productdetails').css({'border-bottom': 'none'})
-        $('#customer_div').attr('hidden',false)
-        $('#product_div').attr('hidden',true)
-
-        $('#customerdetails').on('click',function(){
-            $(this).css({'border-bottom': '3px solid rgba(0, 0, 0, 0.548)'})
-            $('#productdetails a').removeClass('text-dark')
-            $('#customerdetails a').addClass('text-dark')
-            $('#productdetails').css({'border-bottom': 'none'})
-            $('#customer_div').attr('hidden',false)
-            $('#product_div').attr('hidden',true)
-        })
-    })
-
-    $(document).ready(function(){
-        $('#productdetails').on('click',function(){
-        $('#productdetails').css({'border-bottom': '3px solid rgba(0, 0, 0, 0.548)'})
-        $('#customerdetails a').removeClass('text-dark')
-        $('#productdetails a').addClass('text-dark')
-        $('#customerdetails').css({'border-bottom': 'none'})
-        $('#customer_div').attr('hidden',true)
-        $('#product_div').attr('hidden',false)
-        })
-    })
-    $(document).ready(function(){
-        $('#next_btn').on('click',function(){
-            $('#productdetails').click()
-        })
-    })
-    $(document).ready(function(){
-        $('#prev_btn').on('click',function(){
-            $('#customerdetails').click()
-        })
-    })
 </script>
 
 <script>
@@ -809,16 +732,16 @@
                 document.getElementById('upi_id').value=null
 
                 $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "{% url 'bankdata' %}",
                     data: {
                         id: x,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
                     success: function (response) {
-                        data = response.bank
                         document.getElementById('cheque_id').value=null
                         document.getElementById('upi_id').value=null
-                        document.getElementById("bnk_id").value = data
+                        document.getElementById("bnk_id").value = response.bank_no;
                     }
                 });
             }

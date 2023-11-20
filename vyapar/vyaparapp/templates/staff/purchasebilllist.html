@@ -6,7 +6,10 @@
 <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 {% load my_extras %}
 
@@ -203,7 +206,7 @@
                                     </button>
 
                                     <button class="btn mt-3" type="button" onclick="printfunction()" style="margin-right: 2vh;">
-                                        <i class="fa fa-print" aria-hidden="true" style="font-size:22px"></i>
+                                        <span><img width="30px" src="{% static 'images/printer.jpeg' %}" alt="no img"></span>
                                         <br><span style="color: black; font-size: small; font-weight: bold;">Print</span>
                                     </button>
 
@@ -439,14 +442,12 @@
                                         </tr>
                                     </tbody>
                                 </table>
-
                             </div>
                         </div>
                     </div>                        
                 </div>
             </div>
         </div>
-          
     </div>
         
     <div class="modal" id="excelModal" tabindex="-1" role="dialog" aria-labelledby="excelModalLabel" aria-hidden="true">
@@ -480,11 +481,6 @@
         </div>
     </div>
 </div>
-
-<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <script>
     var table = document.getElementById('billtable');

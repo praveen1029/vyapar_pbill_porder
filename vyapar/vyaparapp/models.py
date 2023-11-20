@@ -140,6 +140,21 @@ class TransactionModel(models.Model):
 
 # ========================= ASHIKH V U (END)===========================
 
+class BankModel(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
+    company = models.ForeignKey(company,on_delete=models.CASCADE,blank=True,null=True)
+    bank_name = models.CharField(max_length=255)
+    account_num = models.PositiveBigIntegerField(null=True)
+    ifsc = models.CharField(max_length=255)
+    branch_name = models.CharField(max_length=255)
+    upi_id = models.CharField(max_length=255)
+    as_of_date = models.DateField(null=True)
+    card_type = models.CharField(max_length=255)
+    open_balance = models.BigIntegerField(null=True)
+    current_balance = models.BigIntegerField(null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=255,null=True)
+
 
 class PurchaseBill(models.Model):
     billno = models.AutoField(('BILLID'), primary_key=True)
@@ -151,7 +166,6 @@ class PurchaseBill(models.Model):
     pay_method = models.CharField(max_length=255, default='', null=True)
     cheque_no = models.CharField(max_length=255, default='', null=True)
     upi_no = models.CharField(max_length=255, default='', null=True)
-    bank_no = models.CharField(max_length=255, default='', null=True)
     subtotal = models.IntegerField(default=0, null=True)
     igst = models.CharField(max_length=100,default=0, null=True)
     cgst = models.CharField(max_length=100,default=0, null=True)
