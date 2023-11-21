@@ -3,7 +3,6 @@
 {% load static %}
 
 <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
@@ -41,15 +40,11 @@
     #toReceiveRadio {
         accent-color: green;
     }
-
-    .addnewrow:hover{
-        background-color: violet;
-    }
-
+    
     ::-webkit-scrollbar {
         display: none
     }
-</style>
+</style> 
 
 <div class="body-wrapper">
     <br><br><br>
@@ -71,123 +66,166 @@
                     </a>
                 </div>
                 <p></p>
-  
-                <form action="{% url 'create_purchasebill' %}" method="post" class="needs-validation" enctype="multipart/form-data">
+
+                <form action="{% url 'update_purchaseorder' pord.orderno %}" method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
                     <div class="page-content">
                         <div class="card radius-15">
                             <div class="card-body bg-light">
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <h3 class="mb-3">ADD &nbsp; PURCHASE &nbsp; BILL</h3> 
+                                        <h3 class="mb-3">EDIT &nbsp; PURCHASE &nbsp; ORDER</h3>
                                     </div>
                                     <div class="col-md-7"></div>
                                     <div class="col-md-1">
-                                        <a href="javascript:window.history.back();" style="text-align: right; font-size: large; color: black; margin-left: 8vh;">
-                                            <i class="fa fa-times mt-3" aria-hidden="true"></i>
+                                        <a href="{% url 'view_purchaseorder' %}" style="text-align: right; font-size: large; color: black; margin-left: 8vh;">
+                                            <i class="fa fa-times mt-2" aria-hidden="true"></i>'
                                         </a>
                                     </div>
                                 </div>
-                                <div id="customer_div" style="margin-left: .1px; margin-right: .51px;">
+
+                                <div id="customer_div" style=" margin-left: .1px; margin-right: .51px;">
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label class="col-form-label">Customer</label>
                                             <div class="d-flex">
-                                                <select name="customername" id="customer" class="form-control border-secondary" style="color: black;background-color: white;" >
-                                                    <option value="NIL" selected hidden>Select</option>
+                                                <select name="customername" id="customer" class="form-control border-secondary" style="color: black; background-color: white;">
+                                                    <option value="{{ pord.party.id }}" selected hidden>{{pord.party.party_name}}</option>
                                                     {% for c in cust %}
                                                         {% if c.cid_id == cmp.cid %}
-                                                            <option value={{c.id}}> {{ c.party_name }}</option>
+                                                        <option value={{c.id}}> {{ c.party_name }}</option>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </select> &nbsp;&nbsp;&nbsp;
-                                                <button id="modal_closing" type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#customercreation" data-bs-whatever="@mdo">
+                                                <button id="modal_closing" type="button" class="btn btn-outline-info " data-bs-toggle="modal" data-bs-target="#customercreation" data-bs-whatever="@mdo">
                                                     <span class="fa fa-plus"></span>
-                                                </button>
+                                                </button>    
                                             </div>
-                                            <div class="mt-1 d-flex" >
-                                                &nbsp;<span id="balancediv" style="display: none; color: black;"> Available Balance : <span id="balval"></span></span>
-                                            </div>
+                                            {% if pord.party.payment == 'To Pay' %}
+                                                <div class="mt-1 d-flex" >
+                                                    &nbsp;<span id="balancediv" style=" color: black;"> Available Balance : <span id="balval" style="color: red;">{{pord.party.openingbalance}}</span></span>
+                                                </div> 
+                                            {% else %}
+                                                <div class="mt-1 d-flex" >
+                                                    &nbsp;<span id="balancediv" style=" color: black;"> Available Balance : <span id="balval" style="color: green;">{{pord.party.openingbalance}}</span></span>
+                                                </div> 
+                                            {% endif %}
                                             <div id="emaildiv">
-                                                <label class="col-form-label" >Email </label>
-                                                <input class="form-control border-secondary" name="email" required  id="cust_email"  style="color: black;background-color: white;" readonly>
+                                                <label class="col-form-label">Email </label>
+                                            <input class="form-control border-secondary" name="email" value="{{ pord.party.email }}" style="color: black;background-color: white;" id="cust_email" required>
                                             </div>
                                             <div id="dphonediv" style="display: none;">
                                                 <label class="col-form-label" style="margin-top: 4px;" >Phone No. </label>
-                                                <input class="form-control border-secondary" required  id="dcust_phno"  style="color: black;background-color: white;" readonly>
+                                                <input class="form-control border-secondary" required  id="dcust_phno"  style="color: black;background-color: white;" value="{{pord.party.contact}}" readonly>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="col-form-label">Bill No.</label>
-                                            <input type="text" class="form-control border-secondary" name="bill_no"  id="bill_no" value="{{bill_no}}"  style="color: black;background-color: white;" readonly> <br>
+                                            <label class="col-form-label" style="margin-bottom: 4px;">Order No.</label>
+                                            <input type="text" class="form-control border-secondary" name="ord_no"  id="ord_no"  value="{{pord.orderno}}" style="color: black;background-color: white;"> <br>
+                                            
                                             <div id="phonediv">
-                                                <label class="col-form-label" style="margin-top: 4px;" >Phone No. </label>
-                                                <input class="form-control border-secondary" name="phno"  id="cust_phno"  style="color: black;background-color: white;" readonly>
+                                                <label class="col-form-label">Phone No. </label>
+                                                <input class="form-control border-secondary" name="phno" required  id="cust_phno"  style="color: black;background-color: white;" value="{{pord.party.contact}}" readonly>
                                             </div>
                                         </div>
                                         <div class="col-md-4" id="addressdiv">
                                             <label class="col-form-label">Billing Address</label>
-                                            <textarea class="form-control border-secondary mb-3" name="bname" id="bname" rows="6" type="text" style="color: black;background-color: white;" readonly></textarea>
+                                            <textarea class="form-control border-secondary  mb-3" name="bname" id="bname" rows="6" type="text"style="color: black;background-color: white;">{{ pord.party.address }}</textarea>
                                         </div>
                                         <div class="col-md-4" id="demaildiv" style="display: none;">
                                             <label class="col-form-label" >Email </label>
-                                            <input class="form-control border-secondary"  id="dcust_email"  style="color: black;background-color: white;" readonly>
+                                            <input class="form-control border-secondary"  id="dcust_email"  style="color: black;background-color: white;" value="{{ pord.party.email }}" readonly>
                                         </div>
                                     </div>
 
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <label class="col-form-label">Bill Date</label>
-                                            <input type="date" class="form-control border-secondary" name="billdate" id="billdate"  style="color: black;background-color: white;" value='{{tod}}'>
+                                            <label class="col-form-label">Order Date:</label>
+                                            <input type="date" class="form-control border-secondary" style="color: black; background-color: white;" name="orderdate" id="orderdate" value="{{bdate}}">
+                                            <br>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="col-form-label">Due Date:</label>
+                                            <input type="date" class="form-control border-secondary" style="color: black; background-color: white;" name="duedate" id="duedate" value="{{ddate}}">
                                             <br>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="col-form-label ">Place of Supply</label>
                                             <select type="text" class="form-control border-secondary" id="plosu" name="placosupply"  style="color: black;background-color: white;">
-                                                <option value="" selected hidden>Select</option>
+                                                <option value="{{pord.supplyplace }}" selected hidden>{{pord.supplyplace }}</option>
                                                 <option value="State">State</option>
                                                 <option value="Other State">Other State</option>
                                             </select>
                                         </div>
+                                    </div>
+                                    
+                                    <div class="row">
                                         <div class="col-md-4">
+                                            {% if pord.pay_method != 'Cash' and pord.pay_method != 'Cheque' and pord.pay_method != 'UPI' %}
                                             <label class="col-form-label">Payment Method</label>
                                             <select class="form-control border-secondary my-select" id="pay_method" name="method" style="color: black;background-color: white;">
-                                                <option value=" " selected hidden>Select</option>
+                                                <option value="{{pord.pay_method}}" selected hidden>{{bankno.bank_name}}</option>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Cheque">Cheque</option>
                                                 <option value="UPI">UPI</option>
                                                 {% for b in bank %}
-                                                <option value="{{b.id}}">{{b.bank_name}}</option>
+                                                    <option value="{{b.id}}">{{b.bank_name}}</option>
                                                 {% endfor %}
                                             </select>
+                                            {% else %}
+                                                <label class="col-form-label">Payment Method</label>
+                                                <select class="form-control border-secondary my-select" id="pay_method" name="method" style="color: black;background-color: white;">
+                                                    <option value="{{pord.pay_method}}" selected hidden>{{pord.pay_method}}</option>
+                                                    <option value="Cash">Cash</option>
+                                                    <option value="Cheque">Cheque</option>
+                                                    <option value="UPI">UPI</option>
+                                                    {% for b in bank %}
+                                                        <option value="{{b.id}}">{{b.bank_name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% endif %}
                                         </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div style="display:none;"  id="chequediv">
+                                        {% if pord.cheque_no %}
+                                            <div class="col-md-4" id="chequediv">
+                                                <label class="col-form-label" >Cheque ID</label>
+                                                <input type="text" class="form-control border-secondary" name="cheque_id" id="cheque_id" placeholder="Enter Cheque ID" value="{{pord.cheque_no}}" style="color: black;background-color: white;">
+                                            </div>
+                                        {% else %}
+                                            <div class="col-md-4" style="display:none;"  id="chequediv">
                                                 <label class="col-form-label" >Cheque ID</label>
                                                 <input type="text" class="form-control border-secondary" name="cheque_id" id="cheque_id" placeholder="Enter Cheque ID" style="color: black;background-color: white;">
                                             </div>
-            
-                                            <div style="display:none;" id="upidiv">
+                                        {% endif %}
+                                        {% if pord.upi_no %}
+                                            <div class="col-md-4" id="upidiv">
+                                                <label class="col-form-label" >UPI ID</label>
+                                                <input type="text" class="form-control border-secondary" name="upi_id" id="upi_id" placeholder="Enter UPI ID" value="{{pord.upi_no}}" style="color: black;background-color: white;">
+                                            </div>
+                                        {% else %}
+                                            <div class="col-md-4"  style="display:none;" id="upidiv">
                                                 <label class="col-form-label" >UPI ID</label>
                                                 <input type="text" class="form-control border-secondary" name="upi_id" id="upi_id" placeholder="Enter UPI ID" style="color: black;background-color: white;">
                                             </div>
-            
-                                            <div style="display:none;" id="bnkdiv">
+                                        {% endif %}
+                                        {% if pord.pay_method != 'Cash' %}
+                                            <div class="col-md-4" id="bnkdiv" >
+                                                <label class="col-form-label" >Bank Account</label>
+                                                <input type="text" class="form-control border-secondary" name="bnk_id" id="bnk_id" value="{{bankno.account_num}}" style="color: black;background-color: white;" readonly>
+                                            </div>
+                                        {% else %}
+                                            <div class="col-md-4" style="display:none;" id="bnkdiv">
                                                 <label class="col-form-label" >Bank Account</label>
                                                 <input type="text" class="form-control border-secondary" name="bnk_id" id="bnk_id" style="color: black;background-color: white;" readonly>
                                             </div>
-                                        </div>
+                                        {% endif %}
                                     </div>
                                     <br>
-                                
+
                                     <div class="row clearfix">
                                         <div class="col-md-12 table-responsive-md mt-3">
-                                            <table class="table table-bordered table-hover  mt-3" id="tab_logic" >
+                                            <table class="table table-bordered table-hover mt-3" id="tab_logic">
                                                 <thead>
-                                                    <tr style="color: black;">
+                                                    <tr>
                                                         <th class="text-center">#</th>
                                                         <th class="text-center">PRODUCT</th>
                                                         <th class="text-center">HSN</th>
@@ -200,151 +238,207 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody id="items-table-body">
-                                                    <tr id='addr01'>
-                                                        <td class="nnum" style="text-align: center; color: black; width:2%">1</td>
-    
-                                                        <td style="width:21%">
+                                                {% for j in ordprd %}
+                                                    <tr id='addr0{{ forloop.counter }}'>
+                                                        <td style="text-align: center; width:2%" class="nnum">
+                                                            {{ forloop.counter }}<input type="text"  name='id[]' value="{{ j.id }}" hidden>
+                                                        </td>
+
+                                                        <td style="width:21%" >
                                                             <div class="d-flex">
-                                                                <select name='product[]' id="product1" class="form-control border-secondary product"  onchange="changeprd(this.id)" style="color: black; background-color: white;">
-                                                                    <option value=" " selected hidden>Select Product</option>
+                                                                <select name='product[]' id="product{{ forloop.counter }}" class="form-control product border-secondary" onchange="changeprd(this.id)" style="color: black; background-color: white;">
+                                                                    <option value="{{ j.product.id }}" selected hidden>{{ j.product.item_name }}</option>
+                                                                    <option value=" "  hidden>Select Product</option>
                                                                     {% for i in item %}
                                                                         {% if i.cid_id == cmp.cid %}
                                                                             <option value="{{ i.id }}" >{{ i.item_name  }} </option>
                                                                         {% endif %}
                                                                     {% endfor %}
-                                                                </select> &nbsp;&nbsp;&nbsp;
-                                                            <button id="modal_closing" type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#newitem" data-bs-whatever="@mdo">
-                                                                <span class="fa fa-plus"></span>
-                                                            </button>
+                                                                    
+                                                                </select>&nbsp;&nbsp;&nbsp;
+                                                                <button id="modal_closing" type="button" class="btn btn-outline-info " data-bs-toggle="modal" data-bs-target="#newitem" data-bs-whatever="@mdo">
+                                                                    <span class="fa fa-plus"></span>
+                                                                </button>
                                                             </div>
                                                         </td>
-    
+
                                                         <td style="width:11%">
-                                                            <input type="text" name='hsn[]' id="hsn1" class="form-control border-secondary HSNCODE" style="color: black; background-color: white;" readonly />
+                                                            <input type="text" name='hsn[]'  value="{{ j.product.item_hsn }}" id="hsn{{ forloop.counter }}" class="form-control border-secondary" style="color: black; background-color: white;"/>
                                                         </td>
-    
-                                                        <td style="width:13%">
-                                                            <input type="number" name='qty[]' id="qty1"  class="form-control border-secondary qty mb-1" step=0 min=0 style="color: black; background-color: white;" value=0 onchange="changeqty(this.id)" />
-                                                            <input type="text" id="avl1" style="display: none;">
-                                                            <div class="d-flex" style="color: black; font-size: small;"><span>Available Qty : <span id="qtyspan1" class=''></span></span></div>
+
+                                                        <td style="width: 13%;">
+                                                            <input type="number" name='qty[]' value="{{ j.qty }}"  placeholder='Enter Qty' id="qty{{ forloop.counter }}" value=0 class="form-control qty mb-1 border-secondary" step=0 min=0 style="color: black; background-color: white;" onchange="changeqty(this.id)" />
+                                                            <input type="text" id="avl{{ forloop.counter }}" value="{{j.product.item_current_stock}}" hidden>
+                                                            <div class="d-flex" style="color: black; font-size: small;">
+                                                                <span>Available Qty : <span id="qtyspan{{ forloop.counter }}">{{ j.product.item_current_stock}}</span></span>
+                                                            </div>
                                                         </td>
-                                                    
+
                                                         <td style="width:12%">
-                                                            <input type="number" name='price[]' id="unit1" class="form-control border-secondary price" step="0.00" min="0" style="color: black; background-color: white;" value=0 readonly />
+                                                            <input type="number" name='price[]' value="{{ j.product.item_purchase_price }}" id="unit{{ forloop.counter }}"class="form-control border-secondary price" step="0.00" min="0" style="color: black; background-color: white;" />
                                                         </td>
-                                                    
-                                                        <td style="width:15%">
-                                                            <input type="text" id="intrataxval1" hidden>
-                                                            <input type="text" id="intertaxval1" hidden>
-                                                            <input type="text"  id="select_tax1" placeholder="Tax Rate" class="form-control border-secondary seltax" readonly style=" background-color: white;">
-                                                            <select name='tax1[]' id="tax11" class="form-control border-secondary tax intra_tax d-none" onchange="taxchange(this.id)" style="color: black; background-color: white;">
-                                                                <option  value=" " selected hidden>Select Tax</option>
-                                                                <option value="GST0[0%]">GST0[0%]</option>
-                                                                <option value="GST3[3%]">GST3[3%]</option>
-                                                                <option value="GST5[5%]">GST5[5%]</option>
-                                                                <option value="GST12[12%]">GST12[12%]</option>
-                                                                <option value="GST13[18%]">GST18[18%]</option>
-                                                                <option value="GST28[28%]">GST28[28%]</option>
-                                                            </select>
-                                                            <select name='tax2[]' id="tax21" class="form-control border-secondary tax inter_tax d-none " onchange="taxchange(this.id)" style="color: black; background-color: white;">
-                                                                <option  value=" " selected hidden>Select Tax</option>
-                                                                <option value="IGST0[0%]" >IGST0[0%]</option>
-                                                                <option value="IGST3[3%]">IGST3[3%]</option>
-                                                                <option value="IGST5[5%]">IGST5[5%]</option>
-                                                                <option value="IGST12[12%]">IGST12[12%]</option>
-                                                                <option value="IGST18[18%]">IGST18[18%]</option>
-                                                                <option value="IGST28[28%]">IGST28[28%]</option>
-                                                            </select>
-                                                            <input type="text" style="display: none;" id="tax_percent1">
-                                                            <div class="mt-1" style=" text-align: center;color: red;" ><span id="invalidtax1" style="display: none;">Tax % Changed </span> </div>    
+
+                                                        <td style="width: 15%;">
+                                                            <input type="text" id="intrataxval{{ forloop.counter }}" value="{{j.product.item_gst}}" hidden>
+                                                            <input type="text" id="intertaxval{{ forloop.counter }}" value="{{j.product.item_igst}}" hidden>
+                                                            <input type="text"  id="select_tax{{ forloop.counter }}" placeholder="Tax Rate" class="form-control seltax d-none">
+                                                            {% if pord.supplyplace  == 'State'  %}
+                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-flex border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                    <option selected value="{{j.tax}}" hidden>{{j.tax}}</option>
+                                                                    <option  value=" " hidden>Select Tax</option>
+                                                                    <option value="GST0[0%]" >GST0[0%]</option>
+                                                                    <option value="GST3[3%]">GST3[3%]</option>
+                                                                    <option value="GST5[5%]">GST5[5%]</option>
+                                                                    <option value="GST12[12%]">GST12[12%]</option>
+                                                                    <option value="GST13[18%]">GST18[18%]</option>
+                                                                    <option value="GST28[28%]">GST28[28%]</option>
+                                                                </select>
+                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-none border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                    <option  value=" " hidden>Select Tax</option>
+                                                                    <option value="IGST0[0%]"  >IGST0[0%]</option>
+                                                                    <option value="IGST3[3%]">IGST3[3%]</option>
+                                                                    <option value="IGST5[5%]">IGST5[5%]</option>
+                                                                    <option value="IGST12[12%]">IGST12[12%]</option>
+                                                                    <option value="IGST18[18%]">IGST18[18%]</option>
+                                                                    <option value="IGST28[28%]">IGST28[28%]</option>
+                                                                </select>
+                                                            {% else %}
+                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-none border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                    <option  value=" " hidden>Select Tax</option>
+                                                                    <option value="GST0[0%]" >GST0[0%]</option>
+                                                                    <option value="GST3[3%]">GST3[3%]</option>
+                                                                    <option value="GST5[5%]">GST5[5%]</option>
+                                                                    <option value="GST12[12%]">GST12[12%]</option>
+                                                                    <option value="GST13[18%]">GST18[18%]</option>
+                                                                    <option value="GST28[28%]">GST28[28%]</option>
+                                                                </select>
+                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-flex border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                    <option value="{{j.tax}}" selected hidden>{{j.tax}}</option>
+                                                                    <option  value=" " hidden>Select Tax</option>
+                                                                    <option value="IGST0[0%]" >IGST0[0%]</option>
+                                                                    <option value="IGST3[3%]">IGST3[3%]</option>
+                                                                    <option value="IGST5[5%]">IGST5[5%]</option>
+                                                                    <option value="IGST12[12%]">IGST12[12%]</option>
+                                                                    <option value="IGST18[18%]">IGST18[18%]</option>
+                                                                    <option value="IGST28[28%]">IGST28[28%]</option>
+                                                                </select>
+                                                            {% endif %}
+                                                            <input type="text" style="display: none;" id="tax_percent{{ forloop.counter }}" value="{{j.tax}}">
+                                                            <div class="mt-1" style=" text-align: center;color: red;" >
+                                                                <span id="invalidtax{{ forloop.counter }}" style="display: none;"> Tax % Changed</span> 
+                                                            </div> 
                                                         </td>
-    
-                                                        <td style="width: 10%;" >
-                                                            <input type="number" name='discount[]'  placeholder='Enter Discount' id="disc1" value=0 class="form-control border-secondary disc" step=0 min=0 style="  color: black; background-color: white;"  />
+
+                                                        <td style="width:10%">
+                                                            <input type="number" name='discount[]' placeholder='Enter Discount' id="disc{{forloop.counter}}" value="{{j.discount|default:0}}" class="form-control disc border-secondary" step=0 min=0 style="color: black; background-color: white;">
                                                         </td>
-                                    
+
                                                         <td style="width:13%">
-                                                            <input type="number" name='total[]' id="total1" class="form-control border-secondary total" value=0 readonly style="color: black; background-color: white;"  />
+                                                            <input type="number" name='total[]' value="{{ j.total }}" id="total{{ forloop.counter }}" placeholder=0 class="form-control total border-secondary" value=0 step="any" readonly style="color: black; background-color: white;" />
                                                         </td>
-                                                        <td style="display: none;"><input type="number" name='taxamount1' id="taxamount1" class="form-control border-secondary taxamount" /></td>
-                                                        
+
+                                                        <td style="display: none;">
+                                                            <input type="number" step="any" name='taxamount1' id="taxamount{{ forloop.counter }}" class="form-control taxamount" />
+                                                        </td>
+
                                                         <td style="width:5%">
-                                                            <button type="button" id="1" class="btn font-weight-bold btn-outline-info clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" ></button>
-                                                            <br>
-                                                            <button type="button" id="1" class="btn btn-danger remove_row px-2 py-1 mx-1 fa fa-close" title="Remove Row"> </button>
+                                                            <button type="button" id="{{forloop.counter}}" class="btn btn-outline-info  font-weight-bold clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" ></button><br>
+                                                            <button type="button" id="{{forloop.counter}}" class="btn btn-danger remove_row px-2 py-1 mx-1 fa fa-close" title="Remove Row"> </button>
                                                         </td>
                                                     </tr>
+                                                {% endfor %}
                                                 </tbody>
                                                 <tr>
-                                                    <td style="border: none;"><a class="btn btn-outline-info ml-1" role="button" id="add" ><span class="fa fa-plus"></span></a></td>
+                                                <td style="border: none;"><a class="btn btn-outline-secondary ml-1" role="button" id="add" >+</a></td>
                                                 </tr>
                                             </table>
                                         </div>
                                     </div>
-    
-                                    <div class="clearfix" style="margin-top:10px">
-                                        <div class="row" style="margin-left: 2vh;" >
-                                            <div class="col-md-5 table-responsive-md mt-3 " id="tab_logic_total" style=" color: black; border: 1px solid rgba(128, 128, 128, 0.6); margin-left: -2vh; background-color: rgba(0, 195, 255, 0.205); ">
+
+                                    <div class="clearfix" style="margin-top:20px">
+                                        <div class="row" style="margin-left: 2vh;">
+                                            <div class="col-md-5 table-responsive-md mt-3" id="tab_logic_total" style=" border: 1px solid rgba(128, 128, 128, 0.6); color: black; background-color: rgba(0, 195, 255, 0.205);  margin-left: -2vh;">
                                                 <div class="p-3">
                                                     <div class="row container-fluid p-2 m-0">
                                                         <div class="col-sm-4 mt-2"><label class="text-center">Sub Total</label></div>
                                                         <div class="col-sm-1 mt-2">:</div>
                                                         <div class="col-sm-7">
-                                                            <input type="number" step="any" name='subtotal' value=0.00 readonly style="color: black; background-color: white;" class="form-control border-secondary" id="sub_total">
+                                                            <input type="number" step="any" name='subtotal' value="{{pord.subtotal}}"style="color: black; background-color: white;" readonly class="form-control" id="sub_total">
                                                         </div>
                                                         <div class="col-sm-4 m-0 p-0"></div>
                                                     </div>
-        
-                                                    <div class="row container-fluid p-2 m-0" id="igstdiv">
-                                                        <div class="col-sm-4 mt-2"><label for="a" class="text-center">IGST</label></div>
-                                                        <div class="col-sm-1 mt-2">:</div>
-                                                        <div class="col-sm-7">
-                                                            <input type="number" name='igst' step="any" id="igst" value=0.00 readonly style="color: black; background-color: white;" class="form-control border-secondary"/>
+                                                    {% if pord.supplyplace  == 'State' %}
+                                                        <div class="row container-fluid p-2 m-0" id="cgstdiv">
+                                                            <div class="col-sm-4 mt-2"><label for="a" class="text-center">CGST</label></div>
+                                                            <div class="col-sm-1 mt-2">:</div>
+                                                            <div class="col-sm-7">
+                                                                <input type="number" name='cgst' step="any" id="cgst"  value="{{pord.cgst}}"style="color: black; background-color: white;" readonly class="form-control"/>
+                                                            </div>
+                                                            <div class="col-sm-4 m-0 p-0"></div>
                                                         </div>
-                                                        <div class="col-sm-4 m-0 p-0"></div>
-                                                    </div>
-                                                
-                                                    <div class="row container-fluid p-2 m-0" style="display: none;" id="cgstdiv">
-                                                        <div class="col-sm-4 mt-2"><label for="a" class="text-center">CGST</label></div>
-                                                        <div class="col-sm-1 mt-2">:</div>
-                                                        <div class="col-sm-7">
-                                                            <input type="number" name='cgst' step="any" id="cgst" value=0.00 readonly style="color: black; background-color: white;" class="form-control border-secondary"/>
+                                                        <div class="row container-fluid p-2 m-0"  id="sgstdiv">
+                                                            <div class="col-sm-4 mt-2"><label for="a" class="text-center">SGST</label></div>
+                                                            <div class="col-sm-1 mt-2">:</div>
+                                                            <div class="col-sm-7">
+                                                                <input type="number" name='sgst' step="any" id="sgst" value="{{pord.sgst}}"style="color: black; background-color: white;" readonly class="form-control"/>
+                                                            </div>
+                                                            <div class="col-sm-4 m-0 p-0"></div>
                                                         </div>
-                                                        <div class="col-sm-4 m-0 p-0"></div>
-                                                    </div>
-        
-                                                    <div class="row container-fluid p-2 m-0" style="display: none;" id="sgstdiv">
-                                                        <div class="col-sm-4 mt-2"><label for="a" class="text-center">SGST</label></div>
-                                                        <div class="col-sm-1 mt-2">:</div>
-                                                        <div class="col-sm-7">
-                                                        <input type="number" name='sgst' step="any" id="sgst" value=0.00 readonly style="color: black; background-color: white;" class="form-control border-secondary"/>
+                                                        <div class="row container-fluid p-2 m-0" style="display: none;" id="igstdiv">
+                                                            <div class="col-sm-4 mt-2"><label for="a" class="text-center">IGST</label></div>
+                                                            <div class="col-sm-1 mt-2">:</div>
+                                                            <div class="col-sm-7">
+                                                                <input type="number" name='igst' step="any" id="igst" value="{{pord.igst}}"style="color: black; background-color: white;" readonly class="form-control"/>
+                                                            </div>
+                                                            <div class="col-sm-4 m-0 p-0"></div>
                                                         </div>
-                                                        <div class="col-sm-4 m-0 p-0"></div>
-                                                    </div>
-        
+                                                    {% else %}
+                                                        <div class="row container-fluid p-2 m-0" style="display: none;" id="cgst1">
+                                                            <div class="col-sm-4 mt-2"><label for="a" class="text-center">CGST</label></div>
+                                                            <div class="col-sm-1 mt-2">:</div>
+                                                            <div class="col-sm-7">
+                                                                <input type="number" name='cgst' step="any" id="cgst"  value="{{pord.cgst}}"style="color: black; background-color: white;" readonly class="form-control"/>
+                                                            </div>
+                                                            <div class="col-sm-4 m-0 p-0"></div>
+                                                        </div>
+                                                        <div class="row container-fluid p-2 m-0" style="display: none;" id="sgst1">
+                                                            <div class="col-sm-4 mt-2"><label for="a" class="text-center">SGST</label></div>
+                                                            <div class="col-sm-1 mt-2">:</div>
+                                                            <div class="col-sm-7">
+                                                                <input type="number" name='sgst' step="any" id="sgst" value="{{pord.sgst}}"style="color: black; background-color: white;" readonly class="form-control"/>
+                                                            </div>
+                                                            <div class="col-sm-4 m-0 p-0"></div>
+                                                        </div>
+                                                        <div class="row container-fluid p-2 m-0" id="igst1">
+                                                            <div class="col-sm-4 mt-2"><label for="a" class="text-center">IGST</label></div>
+                                                            <div class="col-sm-1 mt-2">:</div>
+                                                            <div class="col-sm-7">
+                                                                <input type="number" name='igst' step="any" id="igst" value="{{pord.igst}}"style="color: black; background-color: white;" readonly class="form-control"/>
+                                                            </div>
+                                                            <div class="col-sm-4 m-0 p-0"></div>
+                                                        </div>
+                                                    {% endif %}
                                                     <div class="row container-fluid p-2 m-0">
                                                         <div class="col-sm-4 mt-2"><label for="a" class="text-center">Tax Amount</label></div>
                                                         <div class="col-sm-1 mt-2">:</div>
                                                         <div class="col-sm-7">
-                                                        <input type="number" step="any" name='taxamount' id="tax_amount" value=0.00 readonly style="color: black; background-color: white;" class="form-control border-secondary"/>
+                                                            <input type="number" step="any" name='taxamount' value="{{pord.taxamount}}" id="tax_amount"style="color: black; background-color: white;" readonly class="form-control"/>
                                                         </div>
                                                         <div class="col-sm-4 m-0 p-0"></div>
                                                     </div>
-        
                                                     <div class="row container-fluid p-2 m-0">
                                                         <div class="col-sm-4 mt-2"><label for="a" class="text-center">Adjustment</label></div>
                                                         <div class="col-sm-1 mt-2">:</div>
                                                         <div class="col-sm-7">
-                                                        <input type="number" step="any" name='adj' id="adj" value=0.00 class="form-control border-secondary" style="color: black; background-color: white;"/>
+                                                            <input type="number" step="any" name='adj' id="adj" value="{{pord.adjust}}"style="color: black; background-color: white;" class="form-control"/>
                                                         </div>
                                                         <div class="col-sm-4 m-0 p-0"></div>
                                                     </div>
-                                                    
                                                     <div class="row container-fluid p-2 m-0">
                                                         <div class="col-sm-4 mt-2"><label for="a" class="text-center">Grand Total</label></div>
                                                         <div class="col-sm-1 mt-2">:</div>
                                                         <div class="col-sm-7">
-                                                        <input type="number" name='grandtotal' id="grandtotal" value=0.00 readonly style="color: black; background-color: white;" class="form-control border-secondary"/>
+                                                            <input type="number" name='grandtotal' value="{{pord.grandtotal}}" id="grandtotal"style="color: black; background-color: white;"  readonly class="form-control"/>
                                                         </div>
                                                         <div class="col-sm-4 m-0 p-0"></div>
                                                     </div>
@@ -352,14 +446,14 @@
                                             </div>
                                         </div>
 
-                                        <div class="row" style="margin-left: 2vh;" > 
-                                            <div class="col-md-5 table-responsive-md mt-3 " id="tab_logic_total" style="color: black; border: 1px solid rgba(128, 128, 128, 0.6); margin-left: -2vh; background-color: rgba(0, 195, 255, 0.205);">
+                                        <div class="row" style="margin-left: 2vh;">
+                                            <div class="col-md-5 table-responsive-md mt-3 " id="tab_logic_total" style="color: black; background-color: rgba(0, 195, 255, 0.205); border: 1px solid rgba(128, 128, 128, 0.6); margin-left: -2vh;">
                                                 <div class="p-3">
                                                     <div class="row container-fluid p-2 m-0">
                                                         <div class="col-sm-4 mt-2"><label for="a" class="text-center">Paid Off</label></div>
                                                         <div class="col-sm-1 mt-2">:</div>
                                                         <div class="col-sm-7">
-                                                            <input type="number" step="any" name='advance' id="advance" value=0.00 class="form-control border-secondary" style="color: black; background-color: white;"/>
+                                                            <input type="number" step="any" name='advance' id="advance" value="{{pord.advance}}" style="color: black; background-color: white;" class="form-control"/>
                                                         </div>
                                                         <div class="col-sm-4 m-0 p-0"></div>
                                                     </div>
@@ -367,7 +461,7 @@
                                                         <div class="col-sm-4 mt-2"><label for="a" class="text-center">Balance</label></div>
                                                         <div class="col-sm-1 mt-2">:</div>
                                                         <div class="col-sm-7">
-                                                            <input type="number" name='balance' id="balance" value=0.00 readonly style="color: black; background-color: white;"  class="form-control border-secondary" readonly />
+                                                        <input type="number" name='balance' id="balance" readonly style="color: black; background-color: white;"  value="{{pord.balance}}" class="form-control" readonly />
                                                         </div>
                                                         <div class="col-sm-4 m-0 p-0"></div>
                                                     </div>
@@ -375,12 +469,11 @@
                                             </div>
                                         </div>
                                     </div>
-                            
+
                                     <div class="row">
-                                        <div class="col-md-1 mt-4"></div>
-                                        <div class="col-md-5 mt-3 d-flex" style="margin-left:5vh">
-                                            <input type="submit" class="btn btn-primary bg-gradient me-3" name="Next" value="SAVE & NEXT"></input> 
-                                            <input type="submit" class="btn btn-primary bg-gradient" name="Save" value="SAVE"></input>
+                                        <div class="col-md-1 mt-3" style="margin-right: 8vh;"></div>
+                                        <div class="col-md-2 mt-3">
+                                            <input type="submit" class="btn btn-primary bg-gradient w-75" name="Save" value="SAVE"></input>
                                         </div>
                                     </div>
                                 </div>
@@ -389,7 +482,7 @@
                     </div>
                 </form>
             </div>
-        </div> 
+        </div>
 
         <!-- modal -->
           
@@ -409,7 +502,7 @@
                                     <input type="text" class="form-control border-secondary" id="partyname" name="partyname" style="color: black; background-color: white;" required>
 
                                     <label class="col-form-label mt-4" for="partyphno" style="color: black;">Mobile</label>
-                                    <input type="number" class="form-control border-secondary" id="partyphno" name="partyphno" style="color: black; background-color: white;" onchange="checkphone(this)">
+                                    <input type="number" class="form-control border-secondary" id="partyphno" name="partyphno" style="color: black; background-color: white;" onchange="checkphone(this)" required>
                                     <div class="text-danger m-2" id="warnphone"></div>
                                 </div>
 
@@ -492,9 +585,9 @@
                                 <div class="col-md-4 mt-3" >
                                     <label class="col-form-label" style="color: black;" for="openbalance">Opening Balance  &nbsp; &nbsp; - </label>   &nbsp;&nbsp;&nbsp;
                                     <label class="col-form-label" style="color: black;">To Pay</label> &nbsp; &nbsp; 
-                                    <input type="radio" class="radio-input" id="toPayRadio" name="paymentType" value="To Pay"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                    <input type="radio" class="radio-input border-secondary" id="toPayRadio" name="paymentType" value="To Pay"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                                     <label class="col-form-label" style="color: black;">To Receive</label> &nbsp; &nbsp;
-                                    <input type="radio" class="radio-input" id="toReceiveRadio" name="paymentType" value="To Receive">
+                                    <input type="radio" class="radio-input border-secondary" id="toReceiveRadio" name="paymentType" value="To Receive">
                                     <input type="number" class="form-control border-secondary" id="openbalance"  name="openbalance" style="color: black; background-color: white;">
                                 </div>
         
@@ -708,6 +801,27 @@
 </script>
 
 <script>
+    $(document).on('change','#invoicedate', function() {
+        var days = parseInt($('#termadd').val());
+        order_date =new Date( document.getElementById("invoicedate").value)
+        if (!isNaN(order_date.getTime())) {
+            const endDate = new Date(order_date);
+            endDate.setDate(endDate.getDate() + days);
+            const isoString = endDate.toISOString(); 
+            const day = isoString.slice(8, 10);
+            const month = isoString.slice(5, 7);
+            const year = isoString.slice(0, 4);
+
+            const formattedDate = `${day}-${month}-${year}`;
+
+            document.getElementById("duedat").value = formattedDate;
+        } else {
+                alert("Please enter a valid date.");
+        }
+    })
+</script>
+
+<script>
     $(document).ready(function() {
         $("#pay_method").change(function() {
             var x=$('#pay_method').val();
@@ -744,10 +858,10 @@
                         id: x,
                         csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
-                    success: function (response) {
+                    success: function (response){
                         document.getElementById('cheque_id').value=null
                         document.getElementById('upi_id').value=null
-                        document.getElementById("bnk_id").value = response.bank_no;
+                        document.getElementById("bnk_id").value = response.bank_no
                     }
                 });
             }
@@ -759,21 +873,20 @@
     function changeprd(id){
         id_val = id.slice(7)
         document.getElementById(`qty${id_val}`).value = 0
-        document.getElementById(`total1`).value = 0
         document.getElementById(`tax1${id_val}`).value =  ' '
         document.getElementById(`tax2${id_val}`).value = ' '
         document.getElementById(`disc${id_val}`).value = 0
+        document.getElementById(`total${id_val}`).value = 0
         document.getElementById(`taxamount${id_val}`).value = 0
         calc()
     }
 </script>
- 
+
 <script>
     function changeqty(id){
         id_val = id.slice(3)
         qty = document.getElementById(id).value
-        avl_val = document.getElementById(`avl${id_val}`).innerText
-
+        avl_val = document.getElementById(`avl${id_val}`).value
         if( parseFloat(qty) > parseFloat(avl_val) ){
             alert("Quantity Greater than Available Quantity")
             document.getElementById(id).value = 0
@@ -784,12 +897,12 @@
             document.getElementById(`taxamount${id_val}`).value = 0
             document.getElementById(`total${id_val}`).value = 0
             calc()
-        } else {
-            document.getElementById(`qtyspan${id_val}`).textContent = parseInt(avl_val) - parseInt(qty)
+        }else{
+           document.getElementById(`qtyspan${id_val}`).textContent = parseInt(avl_val) - parseInt(qty)
         }
     }
 </script>
- 
+
 <script>
     $(document).ready(function() {
         $("#advance").change(function() {
@@ -799,6 +912,7 @@
                 $('#advance').val(0)
                 $('#balance').val(tot_val.toFixed(2));
                 alert("Advance Greater than Total Amount")
+    
             }else{
                 tot_val = tot_val - adv_val
                 $('#balance').val(tot_val.toFixed(2));
@@ -808,6 +922,43 @@
 </script>
 
 <script>
+    $(document).ready(function() {
+        address = '{{ pord.party.address }}'
+        contact = '{{ pord.party.contact }}'
+        if (contact==''){
+            if (address==''){
+                document.getElementById('demaildiv').style.display = 'block'
+                document.getElementById('emaildiv').style.display = 'none'
+                document.getElementById('addressdiv').style.display = 'none'
+                document.getElementById('dphonediv').style.display = 'none'
+                document.getElementById('phonediv').style.display = 'none'
+            }else{
+                document.getElementById('demaildiv').style.display = 'none'
+                document.getElementById('emaildiv').style.display = 'block'
+                document.getElementById('addressdiv').style.display = 'block'
+                document.getElementById('dphonediv').style.display = 'none'
+                document.getElementById('phonediv').style.display = 'none'
+            }
+        }else{
+            if (address==''){
+                document.getElementById('demaildiv').style.display = 'block'
+                document.getElementById('emaildiv').style.display = 'none'
+                document.getElementById('addressdiv').style.display = 'none'
+                document.getElementById('dphonediv').style.display = 'block'
+                document.getElementById('phonediv').style.display = 'none'
+            }else{
+                document.getElementById('demaildiv').style.display = 'none'
+                document.getElementById('emaildiv').style.display = 'block'
+                document.getElementById('addressdiv').style.display = 'block'
+                document.getElementById('dphonediv').style.display = 'none'
+                document.getElementById('phonediv').style.display = 'block'
+            }
+        }
+    });
+</script>
+
+<script>
+
     $(document).on("change", "#plosu", function(){
         var taxes = document.getElementsByClassName('seltax');
         for (var i = 0; i < taxes.length; i++) {
@@ -848,7 +999,7 @@
         }
         calc()
     });
-
+    
     $(document).on("click", "#customerSave", function(){
         if ($('#toPayRadio').is(':checked')) {
             pay = $('#toPayRadio').val()
@@ -883,7 +1034,7 @@
             },
         });   
     });
-
+    
     function reloadCustomer() {
         $.ajax({
             url: "{% url 'cust_dropdown' %}",
@@ -909,7 +1060,7 @@
             },
         });
     }
-
+    
     $(document).on("click","#itemSave",function(){
         if ($('#inclusive').checked) {
             tax= $('#inclusive').val();
@@ -944,7 +1095,7 @@
             },
         });        
     });
-
+    
     function reloadItem() {
         $.ajax({
             url: "{% url 'item_dropdown' %}",
@@ -967,7 +1118,7 @@
             }
         });
     }
-
+    
     $(document).ready(function () {
         $('#customer').on('change', function() {
             $.ajax({
@@ -982,6 +1133,7 @@
                     document.getElementById('cust_email').value = data.email;
                     document.getElementById('dcust_email').value = data.email;
                     if (data.phno == ''){
+                        console.log(1)
                         document.getElementById('dphonediv').style.display = 'none';
                         document.getElementById('phonediv').style.display = 'none';
                     }else{
@@ -1020,14 +1172,14 @@
             });
         });
     });
-
+    
     $(document).ready(function(){
         $('#add').click(function(){
             var roinc = $("#items-table-body tr").length;
             roinc++
             $('#items-table-body').append(
                 `<tr id='addr0${roinc}'>
-                    <td class = 'nnum' style="text-align: center; width:2%"">${roinc}</td>
+                    <td class = 'nnum' style="text-align: center; width:2%"">${roinc}<input type="text"  name='id[]' value= 0 hidden></td>
 
                     <td style="width:21%">
                         <div class="d-flex">
@@ -1053,7 +1205,7 @@
                     <td style="width:13%">
                         <input type="number" name='qty[]' value=0 id="qty${roinc}" class="form-control border-secondary qty mb-1" step=0 min=0 style="color: black; background-color: white;" onchange="changeqty(this.id)" />
                         <input type="text" id="avl${roinc}" style="display: none;">
-                        <div class='d-flex' style="color: black; font-size: small;;"><span>Available Qty : <span id="qtyspan${roinc}"class=''></span></span></div>
+                        <div class='d-flex' style="color: black; font-size: small;"><span>Available Qty : <span id="qtyspan${roinc}"class=''></span></span></div>
                     </td>
 
                     <td tyle="width:12%">
@@ -1061,12 +1213,12 @@
                     </td>
 
                     <td style='width:15%;'>
-                        <input type="text" id="intrataxval${roinc}" hidden >
-                        <input type="text" id="intertaxval${roinc}" hidden >
+                        <input type="text" id="intrataxval${roinc}" hidden>
+                        <input type="text" id="intertaxval${roinc}" hidden>
                         <input type="text"  id="select_tax${roinc}" placeholder="Tax Rate" class="form-control border-secondary seltax" readonly style="color: black; background-color: white;">
                         <select name='tax1[]' id="tax1${roinc}" class="form-control border-secondary tax intra_tax d-none" onchange="taxchange(this.id)" style="color: black; background-color: white;">
                             <option  value=" " selected hidden>Select Tax</option>
-                            <option value="GST0[0%]" selected>GST0[0%]</option>
+                            <option value="GST0[0%]" >GST0[0%]</option>
                             <option value="GST3[3%]">GST3[3%]</option>
                             <option value="GST5[5%]">GST5[5%]</option>
                             <option value="GST12[12%]">GST12[12%]</option>
@@ -1097,7 +1249,7 @@
                     <td style="display: none;"><input type="number" step="any" name='taxamount1' id="taxamount${roinc}" class="form-control border-secondary taxamount" /></td>
                     
                     <td style="width:13%">
-                        <button type="button" id="${roinc}" class="btn btn-outline-info font-weight-bold clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" ></button>
+                        <button type="button" id="${roinc}" class="btn btn-outline-info  font-weight-bold clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row"></button>
                         <br>
                         <button type="button" id="${roinc}" class="btn btn-danger px-2 mx-1 py-1 remove_row fa fa-close"></button>
                     </td>
@@ -1105,7 +1257,7 @@
             );
         });
     });
-
+    
     $(document).on('change', '.product',function(){ 
         var n = $(this).attr("id").slice(7);
         $.ajax({
@@ -1115,7 +1267,6 @@
                 id : $(this).val(),
                 csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
-            
             success: function(response) {
                 data = response.hsn
                 data2 = response.qty
@@ -1162,29 +1313,25 @@
             },
         });
     });
-
+    
     $(document).on('click','.remove_row',function(){
         var row_id = $(this).attr("id");
         $('#addr0'+row_id+'').remove();
         calc();
     });
-        
+            
     $(document).on('click','.clone_row',function(){
         var roinc = $("#items-table-body tr").length;
         var originalRow = $(this).closest('#items-table-body tr'); 
         var clonedRow = originalRow.clone();
-
         clonedRow.attr('id', 'addr0' +(roinc+1));
-
         clonedRow.find('.nnum').text(roinc+1);
-
         clonedRow.find('[id]').each(function() {
             var oldId = $(this).attr('id');
             var newId = oldId.replace(/\d+/, roinc+1);
             console.log(newId)
             $(this).attr('id', newId );
         });
-
         clonedRow.find('.product').each(function() {
             $(this).val(originalRow.find('.product').val());
         });
@@ -1215,7 +1362,7 @@
             calc_total();
         });
     });
-        
+ 
     function calc() {
         $('#tab_logic tbody tr').each(function () {
             var html = $(this).html();
@@ -1273,8 +1420,8 @@
             $('#cgst').val(d.toFixed(2));
             $('#sgst').val(d.toFixed(2));
         }
-    }         
-
+    }        
+    
     $(document).on("change", "#adj", function(){
         var subtot = $('#sub_total').val();
         var tax = $('#tax_amount').val();
@@ -1283,7 +1430,7 @@
         $('#grandtotal').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(adj)).toFixed(2));
         $('#balance').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(adj)-parseFloat(adv)).toFixed(2));
     });
-  
+
     function checkhsn(element){
         var hsninput = element.value;
         var gstregexp = "[0-9]{6}";
@@ -1316,11 +1463,10 @@
             alert('Please provide a valid Phone Number')
         }
     }
-
+    
 </script>
 
 <script>
-    var checkbox1 = document.getElementById('inclusive');
     checkbox1.addEventListener('click', function () {
         if (checkbox1.checked) {
             document.getElementById('taxdiv').style.display = 'block';

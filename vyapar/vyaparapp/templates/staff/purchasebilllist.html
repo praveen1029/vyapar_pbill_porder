@@ -211,7 +211,7 @@
                                     </button>
 
                                     <button class="btn mt-3" type="button" data-toggle="modal" data-target="#excelModal" onclick="excelmodel()">
-                                        <i class='fas fa-file-import' aria-hidden="true" style="font-size:22px"></i>
+                                        <span><img width="30px" src="{% static 'images/import.png' %}" alt="no img"></span>
                                         <br><span style="color: black; font-size: small; font-weight: bold;">Import</span>
                                     </button>
                                 </div>
@@ -481,6 +481,33 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        var table = document.getElementById("billtable");
+        var rows = table.getElementsByTagName("tr");
+        for (var i = 1; i < rows.length; i++) {
+            var bankid = rows[i].getElementsByTagName("td")[3].innerText;
+            if(bankid != 'Cash' && bankid != 'Cheque' && bankid != 'UPI'){
+                changetobankname(i,bankid)
+            }
+        }
+
+        function changetobankname(rowid,bankid){
+            $.ajax({
+                type : 'POST',
+                url: "{% url 'bankdata' %}",
+                data: {
+                    id: bankid,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                success: function(data){
+                    rows[rowid].getElementsByTagName("td")[3].innerText=data.bank_name
+                }
+            });
+        }
+    });
+</script>
 
 <script>
     var table = document.getElementById('billtable');

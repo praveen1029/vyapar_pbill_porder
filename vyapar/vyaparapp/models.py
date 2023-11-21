@@ -196,3 +196,35 @@ class PurchaseBillTransactionHistory(models.Model):
     ]
     action = models.CharField(max_length=20, choices=CHOICES)
     transactiondate = models.DateField(auto_now=True)
+
+
+class PurchaseOrder(models.Model):
+    orderno = models.AutoField(('ORDID'), primary_key=True)
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    party = models.ForeignKey(party, on_delete=models.CASCADE)
+    orderdate = models.DateField()
+    duedate = models.DateField()
+    supplyplace = models.CharField(max_length=100, default='')
+    pay_method = models.CharField(max_length=255, default='', null=True)
+    cheque_no = models.CharField(max_length=255, default='', null=True)
+    upi_no = models.CharField(max_length=255, default='', null=True)
+    subtotal = models.IntegerField(default=0, null=True)
+    igst = models.CharField(max_length=100,default=0, null=True)
+    cgst = models.CharField(max_length=100,default=0, null=True)
+    sgst = models.CharField(max_length=100,default=0, null=True)
+    taxamount = models.CharField(max_length=100,default=0, null=True)
+    adjust = models.CharField(max_length=100,default=0, null=True)
+    grandtotal = models.FloatField(default=0, null=True)
+    advance=models.CharField(null=True,blank=True,max_length=255)
+    balance=models.CharField(null=True,blank=True,max_length=255)
+    tot_ord_no = models.IntegerField(default=0, null=True)
+
+class PurchaseOrderItem(models.Model):
+    purchaseorder = models.ForeignKey(PurchaseOrder,on_delete=models.CASCADE)
+    company = models.ForeignKey(company,on_delete=models.CASCADE)
+    product = models.ForeignKey(ItemModel,on_delete=models.CASCADE)
+    qty = models.IntegerField(default=0, null=True)
+    total = models.IntegerField(default=0, null=True)
+    tax = models.CharField(max_length=100)
+    discount = models.CharField(max_length=100,default=0, null=True)

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'vyaparapp',
     'django_htmx',
+    'django_social_share',
 ]
 
 MIDDLEWARE = [

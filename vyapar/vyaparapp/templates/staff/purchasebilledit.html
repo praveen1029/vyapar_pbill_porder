@@ -40,11 +40,7 @@
     #toReceiveRadio {
         accent-color: green;
     }
-
-    #customerdetails, #productdetails{
-        cursor: pointer;
-    }
-
+    
     ::-webkit-scrollbar {
         display: none
     }
@@ -114,20 +110,31 @@
                                                     &nbsp;<span id="balancediv" style=" color: black;"> Available Balance : <span id="balval" style="color: green;">{{pbill.party.openingbalance}}</span></span>
                                                 </div> 
                                             {% endif %}
-
-                                            <label class="col-form-label">Email </label>
+                                            <div id="emaildiv">
+                                                <label class="col-form-label">Email </label>
                                             <input class="form-control border-secondary" name="email" value="{{ pbill.party.email }}" style="color: black;background-color: white;" id="cust_email" required>
+                                            </div>
+                                            <div id="dphonediv" style="display: none;">
+                                                <label class="col-form-label" style="margin-top: 4px;" >Phone No. </label>
+                                                <input class="form-control border-secondary" required  id="dcust_phno"  style="color: black;background-color: white;" value="{{pbill.party.contact}}"  readonly>
+                                            </div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="col-form-label" style="margin-bottom: 4px;">Bill No.</label>
                                             <input type="text" class="form-control border-secondary" name="bill_no"  id="bill_no"  value="{{pbill.billno}}" style="color: black;background-color: white;"> <br>
-
-                                            <label class="col-form-label">Phone No. </label>
-                                            <input class="form-control border-secondary" name="phno" required  id="cust_phno"  style="color: black;background-color: white;" value="{{pbill.party.contact}}" readonly>
+                                            
+                                            <div id="phonediv">
+                                                <label class="col-form-label">Phone No. </label>
+                                                <input class="form-control border-secondary" name="phno" required  id="cust_phno"  style="color: black;background-color: white;" value="{{pbill.party.contact}}" readonly>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4" id="addressdiv">
                                             <label class="col-form-label">Billing Address</label>
                                             <textarea class="form-control border-secondary  mb-3" name="bname" id="bname" rows="6" type="text"style="color: black;background-color: white;">{{ pbill.party.address }}</textarea>
+                                        </div>
+                                        <div class="col-md-4" id="demaildiv" style="display: none;">
+                                            <label class="col-form-label" >Email </label>
+                                            <input class="form-control border-secondary"  id="dcust_email"  style="color: black;background-color: white;" value="{{ pbill.party.email }}" readonly>
                                         </div>
                                     </div>
 
@@ -146,9 +153,10 @@
                                             </select>
                                         </div>
                                         <div class="col-md-4">
+                                            {% if pbill.pay_method != 'Cash' and pbill.pay_method != 'Cheque' and pbill.pay_method != 'UPI' %}
                                             <label class="col-form-label">Payment Method</label>
                                             <select class="form-control border-secondary my-select" id="pay_method" name="method" style="color: black;background-color: white;">
-                                                <option value="{{pbill.pay_method}}" selected hidden>{{pbill.pay_method}}</option>
+                                                <option value="{{pbill.pay_method}}" selected hidden>{{bankno.bank_name}}</option>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Cheque">Cheque</option>
                                                 <option value="UPI">UPI</option>
@@ -156,6 +164,18 @@
                                                     <option value="{{b.id}}">{{b.bank_name}}</option>
                                                 {% endfor %}
                                             </select>
+                                            {% else %}
+                                                <label class="col-form-label">Payment Method</label>
+                                                <select class="form-control border-secondary my-select" id="pay_method" name="method" style="color: black;background-color: white;">
+                                                    <option value="{{pbill.pay_method}}" selected hidden>{{pbill.pay_method}}</option>
+                                                    <option value="Cash">Cash</option>
+                                                    <option value="Cheque">Cheque</option>
+                                                    <option value="UPI">UPI</option>
+                                                    {% for b in bank %}
+                                                        <option value="{{b.id}}">{{b.bank_name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     
@@ -182,10 +202,10 @@
                                                 <input type="text" class="form-control border-secondary" name="upi_id" id="upi_id" placeholder="Enter UPI ID" style="color: black;background-color: white;">
                                             </div>
                                         {% endif %}
-                                        {% if pbill.bank_no %}
+                                        {% if pbill.pay_method != 'Cash' %}
                                             <div class="col-md-4" id="bnkdiv" >
                                                 <label class="col-form-label" >Bank Account</label>
-                                                <input type="text" class="form-control border-secondary" name="bnk_id" id="bnk_id" value="{{pbill.bank_no}}" style="color: black;background-color: white;" readonly>
+                                                <input type="text" class="form-control border-secondary" name="bnk_id" id="bnk_id" value="{{bankno.account_num}}" style="color: black;background-color: white;" readonly>
                                             </div>
                                         {% else %}
                                             <div class="col-md-4" style="display:none;" id="bnkdiv">
@@ -563,7 +583,7 @@
                                     <input type="radio" class="radio-input border-secondary" id="toPayRadio" name="paymentType" value="To Pay"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                                     <label class="col-form-label" style="color: black;">To Receive</label> &nbsp; &nbsp;
                                     <input type="radio" class="radio-input border-secondary" id="toReceiveRadio" name="paymentType" value="To Receive">
-                                    <input type="number" class="form-control border-secondary" id="openbalance"  name="openbalance" style="color: black;">
+                                    <input type="number" class="form-control border-secondary" id="openbalance"  name="openbalance" style="color: black; background-color: white;">
                                 </div>
         
                                 <div class="col-md-4 mt-3" >
@@ -897,6 +917,42 @@
 </script>
 
 <script>
+    $(document).ready(function() {
+        address = '{{ pord.party.address }}'
+        contact = '{{ pord.party.contact }}'
+        if (contact==''){
+            if (address==''){
+                document.getElementById('demaildiv').style.display = 'block'
+                document.getElementById('emaildiv').style.display = 'none'
+                document.getElementById('addressdiv').style.display = 'none'
+                document.getElementById('dphonediv').style.display = 'none'
+                document.getElementById('phonediv').style.display = 'none'
+            }else{
+                document.getElementById('demaildiv').style.display = 'none'
+                document.getElementById('emaildiv').style.display = 'block'
+                document.getElementById('addressdiv').style.display = 'block'
+                document.getElementById('dphonediv').style.display = 'none'
+                document.getElementById('phonediv').style.display = 'none'
+            }
+        }else{
+            if (address==''){
+                document.getElementById('demaildiv').style.display = 'block'
+                document.getElementById('emaildiv').style.display = 'none'
+                document.getElementById('addressdiv').style.display = 'none'
+                document.getElementById('dphonediv').style.display = 'block'
+                document.getElementById('phonediv').style.display = 'none'
+            }else{
+                document.getElementById('demaildiv').style.display = 'none'
+                document.getElementById('emaildiv').style.display = 'block'
+                document.getElementById('addressdiv').style.display = 'block'
+                document.getElementById('dphonediv').style.display = 'none'
+                document.getElementById('phonediv').style.display = 'block'
+            }
+        }
+    });
+</script>
+
+<script>
     
     $(document).on("change", "#plosu", function(){
         var taxes = document.getElementsByClassName('seltax');
@@ -1070,8 +1126,34 @@
               
                 success: function(data){
                     document.getElementById('cust_email').value = data.email;
-                    document.getElementById('cust_phno').value = data.phno;
-                    document.getElementById('bname').value = data.address;
+                    document.getElementById('dcust_email').value = data.email;
+                    if (data.phno == ''){
+                        console.log(1)
+                        document.getElementById('dphonediv').style.display = 'none';
+                        document.getElementById('phonediv').style.display = 'none';
+                    }else{
+                        if(data.address == ''){
+                            document.getElementById('dphonediv').style.display = 'block';
+                            document.getElementById('phonediv').style.display = 'none';
+                            document.getElementById('cust_phno').value = data.phno;
+                            document.getElementById('dcust_phno').value = data.phno;
+                        }else{
+                            document.getElementById('dphonediv').style.display = 'none';
+                            document.getElementById('phonediv').style.display = 'block';
+                            document.getElementById('cust_phno').value = data.phno;
+                            document.getElementById('dcust_phno').value = data.phno;
+                        }
+                    }
+                    if (data.address == ''){
+                        document.getElementById('emaildiv').style.display = 'none';
+                        document.getElementById('demaildiv').style.display = 'block';
+                        document.getElementById('addressdiv').style.display = 'none';
+                    }else{
+                        document.getElementById('demaildiv').style.display = 'none';
+                        document.getElementById('emaildiv').style.display = 'block';
+                        document.getElementById('addressdiv').style.display = 'block';
+                        document.getElementById('bname').value = data.address;
+                    }
                     if(data.pay == 'To Pay'){
                         document.getElementById('balancediv').style.display = 'block';
                         document.getElementById('balval').innerText = data.bal;

@@ -1175,6 +1175,8 @@ def deleteparty(request,id):
 
 #End
 
+from openpyxl import load_workbook
+
 def view_purchasebill(request):
   sid = request.session.get('staff_id')
   staff =  staff_details.objects.get(id=sid)
@@ -1284,8 +1286,14 @@ def edit_purchasebill(request,id):
   pbill = PurchaseBill.objects.get(billno=id)
   billprd = PurchaseBillItem.objects.filter(purchasebill=id)
 
+  if pbill.pay_method != 'Cash' and pbill.pay_method != 'Cheque' and pbill.pay_method != 'UPI':
+    bankno = BankModel.objects.get(id= pbill.pay_method,company=cmp,user=cmp.user)
+  else:
+    bankno = 0
+
   bdate = pbill.billdate.strftime("%Y-%m-%d")
-  context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 'cust':cust, 'item':item, 'item_units':item_units, 'bdate':bdate,'bank':bank}
+  context = {'staff':staff, 'allmodules':allmodules, 'pbill':pbill, 'billprd':billprd, 
+             'cust':cust, 'item':item, 'item_units':item_units, 'bdate':bdate,'bank':bank, 'bankno':bankno}
   return render(request,'staff/purchasebilledit.html',context)
 
 
@@ -1389,7 +1397,6 @@ def delete_purchasebill(request,id):
   return redirect('view_purchasebill')
 
 
-from openpyxl import load_workbook
 def import_purchase_bill(request):
   if request.method == 'POST' and request.FILES['billfile']  and request.FILES['prdfile']:
     sid = request.session.get('staff_id')
@@ -1490,26 +1497,220 @@ def billhistory(request):
 
 
 def view_purchaseorder(request):
-  return render(request,'staff/purchaseorderlist.html')
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  allmodules= modules_list.objects.get(company=staff.company,status='New')
+  pord = PurchaseOrder.objects.filter(company=staff.company)
+
+  if not pord:
+    context = {'staff':staff, 'allmodules':allmodules}
+    return render(request,'staff/purchaseorderempty.html',context)
+
+  context = {'staff':staff, 'allmodules':allmodules,'pord':pord}
+  return render(request,'staff/purchaseorderlist.html',context)
 
 
 def add_purchaseorder(request):
-  return render(request,'staff/purchaseorderlist.html')
+  toda = date.today()
+  tod = toda.strftime("%Y-%m-%d")
+  
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
+  cust = party.objects.filter(company=cmp,user=cmp.user)
+  bank = BankModel.objects.filter(company=cmp,user=cmp.user)
+  allmodules= modules_list.objects.get(company=staff.company,status='New')
+  last_ord = PurchaseOrder.objects.last()
+
+  if last_ord:
+    ord_no = last_ord.tot_ord_no + 1 
+  else:
+    ord_no = 1
+
+  item = ItemModel.objects.filter(company=cmp,user=cmp.user)
+  item_units = UnitModel.objects.filter(user=cmp.user,company=staff.company)
+
+  context = {'staff':staff, 'allmodules':allmodules, 'cust':cust, 'cmp':cmp,'ord_no':ord_no, 'tod':tod, 'item':item, 'item_units':item_units,'bank':bank}
+  return render(request,'staff/purchaseorderadd.html',context)
+
+
+def create_purchaseorder(request):
+  if request.method == 'POST': 
+    sid = request.session.get('staff_id')
+    staff = staff_details.objects.get(id=sid)
+    cmp = company.objects.get(id=staff.company.id)    
+    part = party.objects.get(id=request.POST.get('customername'))
+    pord = PurchaseOrder(party=part, 
+                          orderdate=request.POST.get('orderdate'),
+                          duedate=request.POST.get('duedate'),
+                          supplyplace =request.POST.get('placosupply'),
+                          pay_method=request.POST.get("method"),
+                          cheque_no=request.POST.get("cheque_id"),
+                          upi_no=request.POST.get("upi_id"),
+                          advance = request.POST.get("advance"),
+                          balance = request.POST.get("balance"),
+                          subtotal=float(request.POST.get('subtotal')),
+                          igst = request.POST.get('igst'),
+                          cgst = request.POST.get('cgst'),
+                          sgst = request.POST.get('sgst'),
+                          adjust = request.POST.get("adj"),
+                          taxamount = request.POST.get("taxamount"),
+                          grandtotal=request.POST.get('grandtotal'),
+                          company=cmp,staff=staff)
+    pord.save()
+        
+    product = tuple(request.POST.getlist("product[]"))
+    qty =  tuple(request.POST.getlist("qty[]"))
+    discount =  tuple(request.POST.getlist("discount[]"))
+    if request.POST.get('placosupply') =='State':
+      tax =  tuple(request.POST.getlist("tax1[]"))
+    else:
+      tax =  tuple(request.POST.getlist("tax2[]"))
+    total =  tuple(request.POST.getlist("total[]"))
+    ordno = PurchaseOrder.objects.get(orderno=pord.orderno)
+
+    if len(product)==len(qty)==len(tax)==len(discount)==len(total):
+        mapped=zip(product,qty,tax,discount,total)
+        mapped=list(mapped)
+        for ele in mapped:
+          itm = ItemModel.objects.get(id=ele[0])
+          PurchaseOrderItem.objects.create(product=itm,qty=ele[1],tax=ele[2],discount=ele[3],total=ele[4],purchaseorder=ordno,company=cmp)
+
+    PurchaseOrder.objects.all().update(tot_ord_no=F('tot_ord_no') + 1)
+    
+    last_ord = PurchaseOrder.objects.last()
+    last_ord.tot_ord_no = last_ord.orderno
+    last_ord.save()
+
+
+    if 'Next' in request.POST:
+      return redirect('add_purchaseorder')
+    
+    if "Save" in request.POST:
+      return redirect('view_purchaseorder')
+    
+  else:
+    return render(request,'staff/purchasebilladd.html')
+
+
+def edit_purchaseorder(request,id):
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
+  cust = party.objects.filter(company=cmp,user=cmp.user)
+  item = ItemModel.objects.filter(company=cmp,user=cmp.user)
+  item_units = UnitModel.objects.filter(user=cmp.user,company=staff.company.id)
+  bank = BankModel.objects.filter(company=cmp,user=cmp.user)
+  allmodules= modules_list.objects.get(company=staff.company,status='New')
+  pord = PurchaseOrder.objects.get(orderno=id)
+  ordprd = PurchaseOrderItem.objects.filter(purchaseorder=id)
+
+  if pord.pay_method != 'Cash' and pord.pay_method != 'Cheque' and pord.pay_method != 'UPI':
+    bankno = BankModel.objects.get(id = pord.pay_method,company=cmp,user=cmp.user)
+  else:
+    bankno = 0
+
+  bdate = pord.orderdate.strftime("%Y-%m-%d")
+  ddate = pord.duedate.strftime("%Y-%m-%d")
+  context = {'staff':staff, 'allmodules':allmodules, 'pord':pord, 'ordprd':ordprd, 'cust':cust, 'item':item, 
+             'item_units':item_units, 'bdate':bdate, 'ddate':ddate, 'bank':bank, 'bankno':bankno}
+  return render(request,'staff/purchaseorderedit.html',context)
+
+
+def update_purchaseorder(request,id):
+  if request.method =='POST':
+    sid = request.session.get('staff_id')
+    staff = staff_details.objects.get(id=sid)
+    cmp = company.objects.get(id=staff.company.id)  
+    part = party.objects.get(id=request.POST.get('customername'))
+    pord = PurchaseOrder.objects.get(orderno=id,company=cmp,staff=staff)
+    pord.party = part
+    pord.orderdate = request.POST.get('orderdate')
+    pord.duedate = request.POST.get('duedate')
+    pord.supplyplace  = request.POST.get('placosupply')
+    pord.subtotal =float(request.POST.get('subtotal'))
+    pord.grandtotal = request.POST.get('grandtotal')
+    pord.igst = request.POST.get('igst')
+    pord.cgst = request.POST.get('cgst')
+    pord.sgst = request.POST.get('sgst')
+    pord.taxamount = request.POST.get("taxamount")
+    pord.adjust = request.POST.get("adj")
+    pord.pay_method = request.POST.get("method")
+    pord.cheque_no = request.POST.get("cheque_id")
+    pord.upi_no = request.POST.get("upi_id")
+    pord.advance = request.POST.get("advance")
+    pord.balance = request.POST.get("balance")
+
+    pord.save()
+
+    product = tuple(request.POST.getlist("product[]"))
+    qty = tuple(request.POST.getlist("qty[]"))
+    if request.POST.get('placosupply') == 'State':
+      tax =tuple( request.POST.getlist("tax1[]"))
+    else:
+      tax = tuple(request.POST.getlist("tax2[]"))
+    total = tuple(request.POST.getlist("total[]"))
+    discount = tuple(request.POST.getlist("discount[]"))
+    itemid = request.POST.getlist("id[]")
+    item_ids = [int(id) for id in itemid]
+
+    pur= PurchaseOrder.objects.get(orderno =pord.orderno)
+    pur_item = PurchaseOrderItem.objects.filter(purchaseorder=pur)
+    object_ids = [obj.id for obj in pur_item]
+    ids_to_delete = [obj_id for obj_id in object_ids if obj_id not in item_ids]
+    PurchaseOrderItem.objects.filter(id__in=ids_to_delete).delete()
+    count = PurchaseOrderItem.objects.filter(purchaseorder=pur).count()
+    if len(total)==len(discount)==len(qty)==len(tax)==len(total):
+      try:
+        mapped=zip(product,qty,tax,discount,total,item_ids)
+        mapped=list(mapped)
+        for ele in mapped:
+            if int(len(product))>int(count):
+                if ele[5] == 0:
+                  itm = ItemModel.objects.get(id=ele[0])
+                  PurchaseOrderItem.objects.create(product=itm,qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchaseorder=pur,company=cmp)
+                else:
+                  PurchaseOrderItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
+            else:
+              PurchaseOrderItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
+      except:
+        mapped=zip(product,qty,tax,discount,total,item_ids)
+        mapped=list(mapped)
+        for ele in mapped:
+            PurchaseOrderItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
+
+    return redirect('view_purchaseorder')
+
+  return redirect('view_purchaseorder')
+
+
+def details_purchaseorder(request,id):
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  allmodules = modules_list.objects.get(company=staff.company,status='New')
+  pord = PurchaseOrder.objects.get(orderno=id)
+  oitm = PurchaseOrderItem.objects.filter(purchaseorder=pord)
+  dis = 0
+  for itm in oitm:
+    dis += int(itm.discount)
+  itm_len = len(oitm)
+
+  context={'staff':staff,'allmodules':allmodules,'pord':pord,'oitm':oitm,'itm_len':itm_len,'dis':dis}
+  return render(request,'staff/purchaseorderdetails.html',context)
 
 
 def bankdata(request):
   bid = request.POST['id']
   bank = BankModel.objects.get(id=bid) 
   bank_no = bank.account_num
-  return JsonResponse({'bank_no':bank_no})
+  bank_name = bank.bank_name
+  return JsonResponse({'bank_no':bank_no,'bank_name':bank_name})
 
 
 def savecustomer(request):
-  data = request.session.get('staffdata')
-  data = json.loads(data)
-  staff_data = data[0]['fields']
-
-  cmp = company.objects.get(id=staff_data['company'])
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
 
   party_name = request.POST['name']
   email = request.POST['email']
@@ -1535,10 +1736,9 @@ def savecustomer(request):
 
 
 def cust_dropdown(request):
-  data = request.session.get('staffdata')
-  data = json.loads(data)
-  staff_data = data[0]['fields']
-  cmp = company.objects.get(id=staff_data['company'])
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
   part = party.objects.filter(company=cmp,user=cmp.user)
 
   id_list = []
@@ -1551,11 +1751,9 @@ def cust_dropdown(request):
 
 
 def saveitem(request):
-  data = request.session.get('staffdata')
-  data = json.loads(data)
-  staff_data = data[0]['fields']
-
-  cmp = company.objects.get(id=staff_data['company'])
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
 
   name = request.POST['name']
   unit = request.POST['unit']
@@ -1583,10 +1781,9 @@ def saveitem(request):
 
 
 def item_dropdown(request):
-  data = request.session.get('staffdata')
-  data = json.loads(data)
-  staff_data = data[0]['fields']
-  cmp = company.objects.get(id=staff_data['company'])
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  cmp = company.objects.get(id=staff.company.id)
 
   options = {}
   option_objects = ItemModel.objects.filter(company=cmp,user=cmp.user)

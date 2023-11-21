@@ -175,7 +175,7 @@
                         style="margin-right: 10px; background-color: rgb(252, 3, 3,0.7);border-radius: 20px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
                         Add Sale <i class="fa fa-plus"></i>
                     </a>
-                    <a href="{% url 'add_purchasebill' %}" id="b2" class="btn  text-white"
+                    <a href="{% url 'add_purchaseorder' %}" id="b2" class="btn  text-white"
                         style="margin-right: 10px;background-color: rgba(3, 161, 252, 0.7);border-radius: 20px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
                         Add Purchase <i class="fa fa-plus"></i>
                     </a>
@@ -190,7 +190,7 @@
                         <div class="card-body bg-light">
                             <div class="row">
                                 <div class="col-md-4">
-                                    <h3 class="mb-3">PURCHASE  BILL DETAILS</h3> 
+                                    <h3 class="mb-3">PURCHASE ORDER DETAILS</h3> 
                                 </div>
                                 <div class="col-md-4"></div>
                                 <div class="col-md-4">
@@ -202,7 +202,7 @@
                                         <ul style="margin-bottom: -1px;">{% post_to_whatsapp object_or_url "WhatsApp" %}</ul>
                                         <ul style="margin-bottom: -1px;">{% send_email object.title "{{object.title}}" object_or_url "Email" %}</ul>
                                     </div>
-                                    <a class="ml-5" href="{% url 'view_purchasebill' %}" style="text-align: right; font-size: large; color: black;">
+                                    <a class="ml-5" href="{% url 'view_purchaseorder' %}" style="text-align: right; font-size: large; color: black;">
                                         <i class="fa fa-times mt-2" aria-hidden="true"></i>
                                     </a>
                                 </div>
@@ -225,14 +225,15 @@
                                                 <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis">
                                                     <section>
                                                         <div class="text-center">
-                                                            <h2 class="text-info">PURCHASE BILL</h2>
+                                                            <h2 class="text-info">PURCHASE ORDER</h2>
                                                         </div>
                                                     </section>
                                                     <section class="top-content ">
                                                         <div class="top-left">
                                                             <div class="position-relative" style="text-align: left;">
-                                                                <p> Bill No: &nbsp; {{ pbill.billno }}</p>
-                                                                <p>Bill Date: <span>{{pbill.billdate | date:'d-m-Y'}}</span></p>
+                                                                <p> Bill No: &nbsp; {{ pord.orderno }}</p>
+                                                                <p>Bill Date: <span>{{pord.orderdate | date:'d-m-Y'}}</span></p>
+                                                                <p>Due Date: <span>{{pord.duedate | date:'d-m-Y'}}</span></p>
                                                             </div>
                                                         </div>
                                                     </section>
@@ -245,19 +246,19 @@
                                                             <div class="row  pb-3">
                                                                 <div class="col-7">
                                                                     <p><b>FROM</b>,</p>
-                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pbill.staff.first_name }} {{pbill.staff.last_name }}</h5>
+                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pord.staff.first_name }} {{pord.staff.last_name }}</h5>
                                                                     <p class="address" style="margin-top: -1vh; margin-left: 4vh;"> 
-                                                                        {{pbill.company.company_name }}<br>
-                                                                        {{pbill.company.address}}<br>
-                                                                        {{pbill.company.city}},
-                                                                        {{pbill.company.state}}<br>
-                                                                        {{pbill.company.pincode}}<br>
+                                                                        {{pord.company.company_name }}<br>
+                                                                        {{pord.company.address}}<br>
+                                                                        {{pord.company.city}},
+                                                                        {{pord.company.state}}<br>
+                                                                        {{pord.company.pincode}}<br>
                                                                     </p>
                                                                 </div>
                                                                 <div class="col-5">
                                                                     <p><b>TO</b>,</p>
-                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pbill.party.party_name}}</h5>
-                                                                    <p class="address col-9" style="margin-top: -1vh; margin-left: 4vh;"> {{ pbill.party.address}} </p>
+                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pord.party.party_name}}</h5>
+                                                                    <p class="address col-9" style="margin-top: -1vh; margin-left: 4vh;"> {{ pord.party.address}} </p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -279,7 +280,7 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                {% for i in pitm %}
+                                                                {% for i in oitm %}
                                                                 <tr>
                                                                     <td style="color:black; text-align: center;">{{i.product.item_name}}</td>
                                                                     <td style="color:black">{{i.product.item_hsn}}</td >
@@ -303,38 +304,38 @@
                                                                         <tr>
                                                                             <td style="color: #000;">Sub Total</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.subtotal}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.subtotal}}</td>
                                                                         </tr>
-                                                                        {% if pbill.supplyplace == 'State' %}
+                                                                        {% if pord.supplyplace == 'State' %}
                                                                         <tr>
                                                                             <td style="color: #000;">CGST</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.cgst}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.cgst}}</td>
                                                                             
                                                                         </tr>
                                                                         <tr>
                                                                             <td style="color: #000;">SGST</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.sgst}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.sgst}}</td>
                                                                         </tr>
                                                                         {% else %}
                                                                         <tr >
                                                                             <td style="color: #000;">IGST</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.igst}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.igst}}</td>
                                                                         </tr>
                                                                         {% endif %}
                                                                         <tr >
                                                                             <td style="color: #000;">Tax Amount</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.taxamount}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.taxamount}}</td>
                                                                         </tr>
-                                                                        {% if pbill.adjust != '0.00' %}
-                                                                        {% if pbill.adjust != '0' %}
+                                                                        {% if pord.adjust != '0.00' %}
+                                                                        {% if pord.adjust != '0' %}
                                                                         <tr >
                                                                             <td style="color: #000;">Adjustment</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.adjust}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.adjust}}</td>
                                                                         </tr>
                                                                         {% endif %}
                                                                         {% endif %}
@@ -346,7 +347,7 @@
                                                                         <tr>
                                                                             <th style="color: #000;">Grand Total &nbsp;&nbsp;&nbsp;&nbsp;</th>
                                                                             <th style="color: #000; ">:</th>
-                                                                            <th style="color: #000; text-align: center;">{{pbill.grandtotal}}</th>
+                                                                            <th style="color: #000; text-align: center;">{{pord.grandtotal}}</th>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -365,12 +366,13 @@
                                                 <div class="row px-5 py-4" style="background-color:#615dff;" >
                                                     <div class="col-md-4"></div>
                                                     <div class="col-md-4 d-flex justify-content-center">
-                                                        <center class="h3 text-white"><b>PURCHASE BILL</b></center>
+                                                        <center class="h3 text-white"><b>PURCHASE ORDER</b></center>
                                                     </div>  
                                                     <div class="col-md-4 d-flex justify-content-end">
                                                         <div class="text-white" >
-                                                            <p class="mb-0 mt-2" >Bill No: <b>{{pbill.billno }}</b></p>
-                                                            <p class="mb-0 mt-2" >Bill Date: <b>{{pbill.billdate | date:'d-m-Y'}}</b></p>
+                                                            <p class="mb-0 mt-2" >Bill No: <b>{{pord.orderno }}</b></p>
+                                                            <p class="mb-0 mt-2" >Bill Date: <b>{{pord.orderdate | date:'d-m-Y'}}</b></p>
+                                                            <p class="mb-0 mt-2" >Due Date: <b>{{pord.duedate | date:'d-m-Y'}}</b></p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -380,21 +382,21 @@
                                                             <div class="row  pb-2 mt-3">
                                                                 <div class="col-4 pl-0">
                                                                     <label class="text-white w-100 p-1 mb-1" style="background-color: #615dff; border-top-right-radius: 4vh; border-bottom-right-radius: 4vh;" ><b>BILLING ADDRESS</b></label>
-                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pbill.staff.first_name}} {{pbill.staff.last_name}}</h5>
+                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pord.staff.first_name}} {{pord.staff.last_name}}</h5>
                                                                     <p class="address" style="font-weight: bold;color: #000;">
-                                                                        {{pbill.company.company_name}} <br>
-                                                                        {{pbill.company.address}}
+                                                                        {{pord.company.company_name}} <br>
+                                                                        {{pord.company.address}}
                                                                         <br>
-                                                                        {{pbill.company.city}}
+                                                                        {{pord.company.city}}
                                                                         <br>
-                                                                        {{pbill.company.state}} - {{pbill.company.pincode}}
+                                                                        {{pord.company.state}} - {{pord.company.pincode}}
                                                                     </p>  
                                                                 </div>
                                                                 <div class="col-4"></div>
                                                                 <div class="col-4 pr-0">
                                                                     <label class="text-white w-100 p-1 mb-1" style="border-top-right-radius: 4vh; border-bottom-right-radius: 4vh; background-color: #615dff;" ><b>SHIPPING ADDRESS</b></label>
-                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pbill.party.party_name}}</h5>
-                                                                    <p class="address" style="font-weight: bold;color: #000;">{{ pbill.party.address | linebreaksbr}} </p>
+                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pord.party.party_name}}</h5>
+                                                                    <p class="address" style="font-weight: bold;color: #000;">{{ pord.party.address | linebreaksbr}} </p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -414,7 +416,7 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody style="border: 1px solid #615dff;" >
-                                                                {% for itm in pitm %}
+                                                                {% for itm in oitm %}
                                                                     <tr>
                                                                         <td class="text-center" style="color:black">{{ itm.product.item_name}}</td>
                                                                         <td class="text-center" style="color:black">{{ itm.product.item_hsn }}</td>
@@ -439,40 +441,40 @@
                                                                         <tr >
                                                                             <td style="color: #000;">Sub Total</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.subtotal}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.subtotal}}</td>
                                                                         </tr>
                                                                         
-                                                                        {% if pbill.supplyplace != 'State' %}
+                                                                        {% if pord.supplyplace != 'State' %}
                                                                         <tr >
                                                                             <td style="color: #000;">IGST</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.igst}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.igst}}</td>
                                                                         </tr>
                                                                         {% else %}
                                                                         <tr>
                                                                             <td style="color: #000;">CGST</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.cgst}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.cgst}}</td>
                                                                             
                                                                         </tr>
                                                                         <tr>
                                                                             <td style="color: #000;">SGST</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.sgst}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.sgst}}</td>
                                                                         </tr>
                                                                         {% endif %}
                                                                         <tr >
                                                                             <td style="color: #000;">Tax Amount</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.taxamount}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.taxamount}}</td>
                                                                         </tr>
 
-                                                                        {% if pbill.adjust != '0.00' %}
-                                                                        {% if pbill.adjust != '0' %}
+                                                                        {% if pord.adjust != '0.00' %}
+                                                                        {% if pord.adjust != '0' %}
                                                                         <tr >
                                                                             <td style="color: #000;">Adjustment</td>
                                                                             <td style="color: #000;">:</td>
-                                                                            <td class="text-right" style="color: #000;">{{pbill.adjust}}</td>
+                                                                            <td class="text-right" style="color: #000;">{{pord.adjust}}</td>
                                                                         </tr>
                                                                         {% endif %}
                                                                         {% endif %}
@@ -484,7 +486,7 @@
                                                                         <tr >
                                                                             <th style="color: #000;">Grand Total &nbsp;&nbsp;&nbsp;&nbsp;</th>
                                                                             <th style="color: #000; ">:</th>
-                                                                            <th style="color: #000; text-align: center;">{{pbill.grandtotal}}</th>
+                                                                            <th style="color: #000; text-align: center;">{{pord.grandtotal}}</th>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -503,14 +505,14 @@
                                                 <div class="row">
                                                     <div class="col-sm-12" style="background-image: linear-gradient(#3dd9eb, #615dff); color: white;">
                                                         <br>
-                                                        <p style="font-size: 4vh; text-align: center;">PURCHASE BILL</p>
+                                                        <p style="font-size: 4vh; text-align: center;">PURCHASE ORDER</p>
                                                         <p style=" text-align: center;"> 
-                                                            {{pbill.staff.first_name}} {{pbill.staff.last_name}}<br>
-                                                            {{pbill.company.company_name}} <br>
-                                                            {{pbill.company.address}} <br>
-                                                            {{pbill.company.city}},
-                                                            {{pbill.company.state}}<br>
-                                                            {{pbill.company.cemail}}
+                                                            {{pord.staff.first_name}} {{pord.staff.last_name}}<br>
+                                                            {{pord.company.company_name}} <br>
+                                                            {{pord.company.address}} <br>
+                                                            {{pord.company.city}},
+                                                            {{pord.company.state}}<br>
+                                                            {{pord.company.cemail}}
                                                             <br>
                                                         </p>
                                                     </div>
@@ -519,8 +521,8 @@
                                                         <div class="col-5">
                                                             <br><br><br>
                                                             <p style="color:black;"> <span style=" font-weight: bold;">To: </span><br>
-                                                            {{pbill.party.party_name}}<br>
-                                                            {{pbill.party.address|linebreaksbr }}
+                                                            {{pord.party.party_name}}<br>
+                                                            {{pord.party.address|linebreaksbr }}
                                                             </p>
                                                         </div>
                                                         <div class="col-md-2"></div>
@@ -530,11 +532,15 @@
                                                                 <tbody>
                                                                     <tr >
                                                                         <td style="color: #000; font-weight: bold;">Bill No : </td>
-                                                                        <td style="color: #000; text-align: left;">{{ pbill.billno }}</td>
+                                                                        <td style="color: #000; text-align: left;">{{ pord.orderno }}</td>
                                                                     </tr>
                                                                     <tr >
                                                                         <td style="color: #000; font-weight: bold;">Bill Date : </td>
-                                                                        <td style="color: #000; text-align: left;">{{pbill.billdate | date:'d-m-Y'}}<td>
+                                                                        <td style="color: #000; text-align: left;">{{pord.orderdate | date:'d-m-Y'}}<td>
+                                                                    </tr>
+                                                                    <tr >
+                                                                        <td style="color: #000; font-weight: bold;">Due Date : </td>
+                                                                        <td style="color: #000; text-align: left;">{{pord.duedate | date:'d-m-Y'}}<td>
                                                                     </tr>
                                                                 </tbody>
                             
@@ -556,7 +562,7 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                {% for itm in pitm %}
+                                                                {% for itm in oitm %}
                                                                     <tr>
                                                                         <td class="text-center" style="color: black;">{{ itm.product}}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.hsn }}</td>
@@ -581,37 +587,37 @@
                                                                     <tr >
                                                                         <td style="color: #000;">Sub Total</td>
                                                                         <td style="color: #000;">:</td>
-                                                                        <td class="text-right" style="color: #000;">{{pbill.subtotal}}</td>
+                                                                        <td class="text-right" style="color: #000;">{{pord.subtotal}}</td>
                                                                     </tr>
-                                                                    {% if pbill.supplyplace != 'State' %}
+                                                                    {% if pord.supplyplace != 'State' %}
                                                                     <tr >
                                                                         <td style="color: #000;">IGST</td>
                                                                         <td style="color: #000;">:</td>
-                                                                        <td class="text-right" style="color: #000;">{{pbill.igst}}</td>
+                                                                        <td class="text-right" style="color: #000;">{{pord.igst}}</td>
                                                                     </tr>
                                                                     {% else %}
                                                                     <tr>
                                                                         <td style="color: #000;">CGST</td>
                                                                         <td style="color: #000;">:</td>
-                                                                        <td class="text-right" style="color: #000;">{{pbill.cgst}}</td>
+                                                                        <td class="text-right" style="color: #000;">{{pord.cgst}}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td style="color: #000;">SGST</td>
                                                                         <td style="color: #000;">:</td>
-                                                                        <td class="text-right" style="color: #000;">{{pbill.sgst}}</td>
+                                                                        <td class="text-right" style="color: #000;">{{pord.sgst}}</td>
                                                                     </tr>
                                                                     {% endif %}
                                                                     <tr >
                                                                         <td style="color: #000;">Tax Amount</td>
                                                                         <td style="color: #000;">:</td>
-                                                                        <td class="text-right" style="color: #000;">{{pbill.taxamount}}</td>
+                                                                        <td class="text-right" style="color: #000;">{{pord.taxamount}}</td>
                                                                     </tr>
-                                                                    {% if pbill.adjust != '0.00' %}
-                                                                    {% if pbill.adjust != '0' %}
+                                                                    {% if pord.adjust != '0.00' %}
+                                                                    {% if pord.adjust != '0' %}
                                                                     <tr >
                                                                         <td style="color: #000;">Adjustment</td>
                                                                         <td style="color: #000;">:</td>
-                                                                        <td class="text-right" style="color: #000;">{{pbill.adjust}}</td>
+                                                                        <td class="text-right" style="color: #000;">{{pord.adjust}}</td>
                                                                     </tr>
                                                                     {% endif %}
                                                                     {% endif %}
@@ -623,7 +629,7 @@
                                                                     <tr >
                                                                         <th style="color: #000;">Grand Total &nbsp;&nbsp;&nbsp;&nbsp;</th>
                                                                         <th style="color: #000; ">:</th>
-                                                                        <th style="color: #000; text-align: center;">{{pbill.grandtotal}}</th>
+                                                                        <th style="color: #000; text-align: center;">{{pord.grandtotal}}</th>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -649,29 +655,33 @@
                                             <div class="card bg-white" style="border: 1px dotted black; box-shadow: 2px 2px 10px 3px rgba(0, 0, 0, 0.397);">
                                                 <div class="mt-2" style="text-align: center;">
                                                     <div class="text-center" style="font-size: 3vh; color: black;">
-                                                        <b>{{pbill.company.company_name}} </b>
+                                                        <b>{{pord.company.company_name}} </b>
                                                     </div>
                                                     <span style="font-size: x-small; color: black;">
-                                                        {{ pbill.company.address }} <br>
-                                                        {{pbill.company.city}},
-                                                        {{pbill.company.state}}
-                                                        {{pbill.company.pincode}} <br>
-                                                        {{ pbill.company.user.email }} <br>
-                                                        {{ pbill.company.contact }} 
+                                                        {{ pord.company.address }} <br>
+                                                        {{pord.company.city}},
+                                                        {{pord.company.state}}
+                                                        {{pord.company.pincode}} <br>
+                                                        {{ pord.company.user.email }} <br>
+                                                        {{ pord.company.contact }} 
                                                     </span>
                                                 </div>
                                                 <div class="ml-4 mt-2" style="color: black;">
                                                     <div class="row">
                                                         <div class="col-md-6 text-left">Bill No:</div>
-                                                        <div class="col-md-5 text-right">{{pbill.billno}}</div>
+                                                        <div class="col-md-5 text-right">{{pord.orderno}}</div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-md-6 text-left">Customer Name:</div>
-                                                        <div class="col-md-5 text-right">{{pbill.party.party_name}}</div>
+                                                        <div class="col-md-5 text-right">{{pord.party.party_name}}</div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-md-6 text-left">Bill Date :</div>
-                                                        <div class="col-md-5 text-right">{{pbill.billdate | date:'d-m-Y'}}</div>
+                                                        <div class="col-md-5 text-right">{{pord.orderdate | date:'d-m-Y'}}</div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6 text-left">Due Date :</div>
+                                                        <div class="col-md-5 text-right">{{pord.duedate | date:'d-m-Y'}}</div>
                                                     </div>
                                                 </div>
                                                 <div><br>
@@ -703,7 +713,7 @@
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    {% for i in pitm %}
+                                                    {% for i in oitm %}
                                                     <div class="equal-length-container" style="color: black; font-size: small; word-wrap: break-word; margin-bottom: 1vh;">
                                                         <div class="equal-length-item"  style="text-align: center; margin-left: 2px;">
                                                             {{i.product.item_name}}
@@ -744,16 +754,16 @@
                                                             Subtotal
                                                         </div>
                                                         <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                            {{ pbill.subtotal }}
+                                                            {{ pord.subtotal }}
                                                         </div>
                                                     </div>
-                                                    {% if pbill.supplyplace != 'State' %}
+                                                    {% if pord.supplyplace != 'State' %}
                                                     <div class="row ml-1">
                                                         <div class="col-md-5 text-left " style=" color: black;">
                                                             IGST
                                                         </div>
                                                         <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                            {{ pbill.igst }}
+                                                            {{ pord.igst }}
                                                         </div>
                                                     </div>
                                                     {% else %}
@@ -762,7 +772,7 @@
                                                             CGST
                                                         </div>
                                                         <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                            {{ pbill.cgst }}
+                                                            {{ pord.cgst }}
                                                         </div>
                                                     </div>
                                                     <div class="row ml-1">
@@ -770,19 +780,19 @@
                                                             SGST
                                                         </div>
                                                         <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                            {{ pbill.sgst }}
+                                                            {{ pord.sgst }}
                                                         </div>
                                                     </div>
                                                     {% endif %}
 
-                                                    {% if pbill.adjust != '0.00' %}
-                                                    {% if pbill.adjust != '0' %}
+                                                    {% if pord.adjust != '0.00' %}
+                                                    {% if pord.adjust != '0' %}
                                                     <div class="row ml-1">
                                                         <div class="col-md-5 text-left" style=" color: black;">
                                                             Adjust
                                                         </div>
                                                         <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                            {{ pbill.adjust }}
+                                                            {{ pord.adjust }}
                                                         </div>
                                                     </div>
                                                     {% endif %}
@@ -796,13 +806,13 @@
                                                             Total
                                                         </div>
                                                         <div class="col-md-6 text-right ml-2" style="font-size: large; color: black; font-weight: bold;">
-                                                            {{ pbill.grandtotal }}
+                                                            {{ pord.grandtotal }}
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <div class="ml-2 mt-2">
-                                                    <p>Created by : {{pbill.staff.first_name}}  {{pbill.staff.last_name}} <br>
+                                                    <p>Created by : {{pord.staff.first_name}}  {{pord.staff.last_name}} <br>
                                                     Printed by {{staff.first_name}}  {{staff.last_name}} <br>
                                                     On <span id="datetimedisplay"></span>
                                                     </p>
@@ -840,7 +850,7 @@
 
 <script>
     l = parseInt('{{itm_len}}')
-    place = '{{pbill.supplyplace}}'
+    place = '{{pord.supplyplace}}'
     for (var i=1; i<=l; i++){
         val =  document.getElementById('tax'+i).innerText
         tax = val.split('[')[1];

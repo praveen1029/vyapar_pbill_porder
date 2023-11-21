@@ -61,7 +61,7 @@
                         style="margin-right: 10px; background-color: rgb(252, 3, 3,0.7);border-radius: 20px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
                         Add Sale <i class="fa fa-plus"></i>
                     </a>
-                    <a href="{% url 'add_purchasebill' %}" id="b2" class="btn  text-white"
+                    <a href="{% url 'add_purchaseorder' %}" id="b2" class="btn  text-white"
                         style="margin-right: 10px;background-color: rgba(3, 161, 252, 0.7);border-radius: 20px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
                         Add Purchase <i class="fa fa-plus"></i>
                     </a>
@@ -72,14 +72,14 @@
                 </div>
                 <p></p>
   
-                <form action="{% url 'create_purchasebill' %}" method="post" class="needs-validation" enctype="multipart/form-data">
+                <form action="{% url 'create_purchaseorder' %}" method="post" class="needs-validation" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="page-content">
                         <div class="card radius-15">
                             <div class="card-body bg-light">
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <h3 class="mb-3">ADD &nbsp; PURCHASE &nbsp; BILL</h3> 
+                                        <h3 class="mb-3">ADD &nbsp; PURCHASE &nbsp; ORDER</h3> 
                                     </div>
                                     <div class="col-md-7"></div>
                                     <div class="col-md-1">
@@ -118,8 +118,8 @@
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="col-form-label">Bill No.</label>
-                                            <input type="text" class="form-control border-secondary" name="bill_no"  id="bill_no" value="{{bill_no}}"  style="color: black;background-color: white;" readonly> <br>
+                                            <label class="col-form-label">Order No.</label>
+                                            <input type="text" class="form-control border-secondary" name="ord_no"  id="ord_no" value="{{ord_no}}"  style="color: black;background-color: white;" readonly> <br>
                                             <div id="phonediv">
                                                 <label class="col-form-label" style="margin-top: 4px;" >Phone No. </label>
                                                 <input class="form-control border-secondary" name="phno"  id="cust_phno"  style="color: black;background-color: white;" readonly>
@@ -137,8 +137,13 @@
 
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <label class="col-form-label">Bill Date</label>
-                                            <input type="date" class="form-control border-secondary" name="billdate" id="billdate"  style="color: black;background-color: white;" value='{{tod}}'>
+                                            <label class="col-form-label">Order Date</label>
+                                            <input type="date" class="form-control border-secondary" name="orderdate" id="orderdate"  style="color: black;background-color: white;" value='{{tod}}'>
+                                            <br>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="col-form-label">Due Date</label>
+                                            <input type="date" class="form-control border-secondary" name="duedate" id="duedate"  style="color: black;background-color: white;" value='{{tod}}'>
                                             <br>
                                         </div>
                                         <div class="col-md-4">
@@ -149,6 +154,9 @@
                                                 <option value="Other State">Other State</option>
                                             </select>
                                         </div>
+                                    </div>
+
+                                    <div class="row">
                                         <div class="col-md-4">
                                             <label class="col-form-label">Payment Method</label>
                                             <select class="form-control border-secondary my-select" id="pay_method" name="method" style="color: black;background-color: white;">
@@ -161,9 +169,6 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
                                         <div class="col-md-4">
                                             <div style="display:none;"  id="chequediv">
                                                 <label class="col-form-label" >Cheque ID</label>
