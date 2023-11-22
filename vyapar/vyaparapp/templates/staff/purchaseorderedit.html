@@ -67,7 +67,7 @@
                 </div>
                 <p></p>
 
-                <form action="{% url 'update_purchaseorder' pord.orderno %}" method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
+                <form action="{% url 'update_purchaseorder' pord.orderno %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchaseorder()">
                     {% csrf_token %}
                     <div class="page-content">
                         <div class="card radius-15">
@@ -110,34 +110,35 @@
                                                     &nbsp;<span id="balancediv" style=" color: black;"> Available Balance : <span id="balval" style="color: green;">{{pord.party.openingbalance}}</span></span>
                                                 </div> 
                                             {% endif %}
-                                            <div id="emaildiv">
-                                                <label class="col-form-label">Email </label>
-                                            <input class="form-control border-secondary" name="email" value="{{ pord.party.email }}" style="color: black;background-color: white;" id="cust_email" required>
-                                            </div>
-                                            <div id="dphonediv" style="display: none;">
-                                                <label class="col-form-label" style="margin-top: 4px;" >Phone No. </label>
-                                                <input class="form-control border-secondary" required  id="dcust_phno"  style="color: black;background-color: white;" value="{{pord.party.contact}}" readonly>
+                                            <div id="orderdiv">
+                                                <label class="col-form-label">Order No.</label>
+                                                <input type="text" class="form-control border-secondary" name="ord_no"  id="ord_no" value="{{pord.orderno}}"  style="color: black;background-color: white;" readonly> <br>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="col-form-label" style="margin-bottom: 4px;">Order No.</label>
-                                            <input type="text" class="form-control border-secondary" name="ord_no"  id="ord_no"  value="{{pord.orderno}}" style="color: black;background-color: white;"> <br>
-                                            
                                             <div id="phonediv">
                                                 <label class="col-form-label">Phone No. </label>
                                                 <input class="form-control border-secondary" name="phno" required  id="cust_phno"  style="color: black;background-color: white;" value="{{pord.party.contact}}" readonly>
+                                            </div>
+                                            <div id="dorddiv" style="display: none;">
+                                                <label class="col-form-label">Order No.</label>
+                                                <input type="text" class="form-control border-secondary" value="{{pord.orderno}}"  style="color: black;background-color: white;" readonly> <br>
+                                            </div>
+                                            <div id="daddressdiv" style="display: none;">
+                                                <label class="col-form-label">Billing Address</label>
+                                                <textarea class="form-control border-secondary mb-3" name="dbname" id="dbname" rows="6" type="text" style="color: black;background-color: white;" readonly></textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-4" id="addressdiv">
                                             <label class="col-form-label">Billing Address</label>
                                             <textarea class="form-control border-secondary  mb-3" name="bname" id="bname" rows="6" type="text"style="color: black;background-color: white;">{{ pord.party.address }}</textarea>
                                         </div>
-                                        <div class="col-md-4" id="demaildiv" style="display: none;">
-                                            <label class="col-form-label" >Email </label>
-                                            <input class="form-control border-secondary"  id="dcust_email"  style="color: black;background-color: white;" value="{{ pord.party.email }}" readonly>
+                                        <div class="col-md-4" id="ddorddiv" style="display: none;">
+                                            <label class="col-form-label">Order No.</label>
+                                            <input type="text" class="form-control border-secondary" value="{{pord.orderno}}"  style="color: black;background-color: white;" readonly> <br>
                                         </div>
                                     </div>
-
+                                    <br>
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label class="col-form-label">Order Date:</label>
@@ -248,7 +249,7 @@
                                                             <div class="d-flex">
                                                                 <select name='product[]' id="product{{ forloop.counter }}" class="form-control product border-secondary" onchange="changeprd(this.id)" style="color: black; background-color: white;">
                                                                     <option value="{{ j.product.id }}" selected hidden>{{ j.product.item_name }}</option>
-                                                                    <option value=" "  hidden>Select Product</option>
+                                                                    <option value=""  hidden>Select Product</option>
                                                                     {% for i in item %}
                                                                         {% if i.cid_id == cmp.cid %}
                                                                             <option value="{{ i.id }}" >{{ i.item_name  }} </option>
@@ -267,11 +268,7 @@
                                                         </td>
 
                                                         <td style="width: 13%;">
-                                                            <input type="number" name='qty[]' value="{{ j.qty }}"  placeholder='Enter Qty' id="qty{{ forloop.counter }}" value=0 class="form-control qty mb-1 border-secondary" step=0 min=0 style="color: black; background-color: white;" onchange="changeqty(this.id)" />
-                                                            <input type="text" id="avl{{ forloop.counter }}" value="{{j.product.item_current_stock}}" hidden>
-                                                            <div class="d-flex" style="color: black; font-size: small;">
-                                                                <span>Available Qty : <span id="qtyspan{{ forloop.counter }}">{{ j.product.item_current_stock}}</span></span>
-                                                            </div>
+                                                            <input type="number" name='qty[]' value="{{ j.qty }}"  placeholder='Enter Qty' id="qty{{ forloop.counter }}" value=0 class="form-control qty mb-1 border-secondary" step=0 min=0 style="color: black; background-color: white;" />
                                                         </td>
 
                                                         <td style="width:12%">
@@ -283,7 +280,7 @@
                                                             <input type="text" id="intertaxval{{ forloop.counter }}" value="{{j.product.item_igst}}" hidden>
                                                             <input type="text"  id="select_tax{{ forloop.counter }}" placeholder="Tax Rate" class="form-control seltax d-none">
                                                             {% if pord.supplyplace  == 'State'  %}
-                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-flex border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-flex border-secondary" style="color: black; background-color: white;">
                                                                     <option selected value="{{j.tax}}" hidden>{{j.tax}}</option>
                                                                     <option  value=" " hidden>Select Tax</option>
                                                                     <option value="GST0[0%]" >GST0[0%]</option>
@@ -293,7 +290,7 @@
                                                                     <option value="GST13[18%]">GST18[18%]</option>
                                                                     <option value="GST28[28%]">GST28[28%]</option>
                                                                 </select>
-                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-none border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-none border-secondary" style="color: black; background-color: white;">
                                                                     <option  value=" " hidden>Select Tax</option>
                                                                     <option value="IGST0[0%]"  >IGST0[0%]</option>
                                                                     <option value="IGST3[3%]">IGST3[3%]</option>
@@ -303,7 +300,7 @@
                                                                     <option value="IGST28[28%]">IGST28[28%]</option>
                                                                 </select>
                                                             {% else %}
-                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-none border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-none border-secondary" style="color: black; background-color: white;">
                                                                     <option  value=" " hidden>Select Tax</option>
                                                                     <option value="GST0[0%]" >GST0[0%]</option>
                                                                     <option value="GST3[3%]">GST3[3%]</option>
@@ -312,7 +309,7 @@
                                                                     <option value="GST13[18%]">GST18[18%]</option>
                                                                     <option value="GST28[28%]">GST28[28%]</option>
                                                                 </select>
-                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-flex border-secondary" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-flex border-secondary" style="color: black; background-color: white;">
                                                                     <option value="{{j.tax}}" selected hidden>{{j.tax}}</option>
                                                                     <option  value=" " hidden>Select Tax</option>
                                                                     <option value="IGST0[0%]" >IGST0[0%]</option>
@@ -323,10 +320,6 @@
                                                                     <option value="IGST28[28%]">IGST28[28%]</option>
                                                                 </select>
                                                             {% endif %}
-                                                            <input type="text" style="display: none;" id="tax_percent{{ forloop.counter }}" value="{{j.tax}}">
-                                                            <div class="mt-1" style=" text-align: center;color: red;" >
-                                                                <span id="invalidtax{{ forloop.counter }}" style="display: none;"> Tax % Changed</span> 
-                                                            </div> 
                                                         </td>
 
                                                         <td style="width:10%">
@@ -780,24 +773,58 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        $('#customer').select2();
-    });
+    function validatepurchaseorder() {
+        var customer = document.getElementById('customer').value;
+        var plosu = document.getElementById('plosu').value;
+        var pay_method = document.getElementById('pay_method').value;
+        var cheque_id = document.getElementById('cheque_id').value;
+        var upi_id = document.getElementById('upi_id').value;
+
+        if (customer === 'NIL') {
+            alert('Please select a customer');
+            return false;
+        } else if(plosu === ''){
+            alert('Please select place of supply');
+            return false;
+        }
+
+        if (pay_method === ''){
+            alert('Please select a Payment Method');
+            return false;
+        }else if(pay_method === 'Cheque'){
+            if (cheque_id === ''){
+                alert('Add a cheque number');
+                return false;
+            }
+        }else if(pay_method === 'UPI'){
+            if (upi_id === ''){
+                alert('Add a UPI number');
+                return false;
+            }
+        }
+
+        var table = document.getElementById('tab_logic');
+        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        for (var i = 1; i <= rows.length; i++) {
+            var product = document.getElementById('product'+i).value;
+            var qty = document.getElementById('qty'+i).value;
+            if(product === ''){
+                alert('Select a product on row '+ i);
+                return false;
+            }
+            if(qty === '0'){
+                alert('Add quantity in row '+ i);
+                return false;
+            }
+        }
+        return true; 
+    }
 </script>
 
 <script>
-    function taxchange(id){
-        id_val = id.slice(4)
-        taxprecent = document.getElementById(`tax_percent${id_val}`).value
-        taxval = document.getElementById(id).value
-        if (taxprecent != taxval){
-            document.getElementById(`invalidtax${id_val}`).style.display = 'block';
-            calc()
-        }else{
-            document.getElementById(`invalidtax${id_val}`).style.display = 'none';
-            calc()
-        }
-    }
+    $(document).ready(function() {
+        $('#customer').select2();
+    });
 </script>
 
 <script>
@@ -883,27 +910,6 @@
 </script>
 
 <script>
-    function changeqty(id){
-        id_val = id.slice(3)
-        qty = document.getElementById(id).value
-        avl_val = document.getElementById(`avl${id_val}`).value
-        if( parseFloat(qty) > parseFloat(avl_val) ){
-            alert("Quantity Greater than Available Quantity")
-            document.getElementById(id).value = 0
-            document.getElementById(`product${id_val}`).value =  ' '
-            document.getElementById(`tax1${id_val}`).value = ' '
-            document.getElementById(`tax2${id_val}`).value = ' '
-            document.getElementById(`disc${id_val}`).value = 0
-            document.getElementById(`taxamount${id_val}`).value = 0
-            document.getElementById(`total${id_val}`).value = 0
-            calc()
-        }else{
-           document.getElementById(`qtyspan${id_val}`).textContent = parseInt(avl_val) - parseInt(qty)
-        }
-    }
-</script>
-
-<script>
     $(document).ready(function() {
         $("#advance").change(function() {
             tot_val = parseFloat($('#grandtotal').val())
@@ -925,33 +931,41 @@
     $(document).ready(function() {
         address = '{{ pord.party.address }}'
         contact = '{{ pord.party.contact }}'
-        if (contact==''){
-            if (address==''){
-                document.getElementById('demaildiv').style.display = 'block'
-                document.getElementById('emaildiv').style.display = 'none'
-                document.getElementById('addressdiv').style.display = 'none'
-                document.getElementById('dphonediv').style.display = 'none'
-                document.getElementById('phonediv').style.display = 'none'
+        if (data.phno == ''){
+            if(data.address == ''){
+                document.getElementById('daddressdiv').style.display = 'none';
+                document.getElementById('addressdiv').style.display = 'none';
+                document.getElementById('phonediv').style.display = 'none';
+                document.getElementById('dorddiv').style.display = 'block';
+                document.getElementById('orderdiv').style.display = 'none';
+                document.getElementById('ddorddiv').style.display = 'none';
             }else{
-                document.getElementById('demaildiv').style.display = 'none'
-                document.getElementById('emaildiv').style.display = 'block'
-                document.getElementById('addressdiv').style.display = 'block'
-                document.getElementById('dphonediv').style.display = 'none'
-                document.getElementById('phonediv').style.display = 'none'
+                document.getElementById('daddressdiv').style.display = 'block';
+                document.getElementById('addressdiv').style.display = 'none';
+                document.getElementById('phonediv').style.display = 'none';
+                document.getElementById('orderdiv').style.display = 'block';
+                document.getElementById('dorddiv').style.display = 'none';
+                document.getElementById('ddorddiv').style.display = 'none';
+                document.getElementById('dbname').value = data.address;
             }
         }else{
-            if (address==''){
-                document.getElementById('demaildiv').style.display = 'block'
-                document.getElementById('emaildiv').style.display = 'none'
-                document.getElementById('addressdiv').style.display = 'none'
-                document.getElementById('dphonediv').style.display = 'block'
-                document.getElementById('phonediv').style.display = 'none'
+            if(data.address == ''){
+                document.getElementById('daddressdiv').style.display = 'none';
+                document.getElementById('addressdiv').style.display = 'none';
+                document.getElementById('phonediv').style.display = 'block';
+                document.getElementById('cust_phno').value = data.phno;
+                document.getElementById('ddorddiv').style.display = 'block';
+                document.getElementById('dorddiv').style.display = 'none';
+                document.getElementById('orderdiv').style.display = 'none';
             }else{
-                document.getElementById('demaildiv').style.display = 'none'
-                document.getElementById('emaildiv').style.display = 'block'
-                document.getElementById('addressdiv').style.display = 'block'
-                document.getElementById('dphonediv').style.display = 'none'
-                document.getElementById('phonediv').style.display = 'block'
+                document.getElementById('daddressdiv').style.display = 'none';
+                document.getElementById('addressdiv').style.display = 'block';
+                document.getElementById('phonediv').style.display = 'block';
+                document.getElementById('bname').value = data.address;
+                document.getElementById('cust_phno').value = data.phno;
+                document.getElementById('ddorddiv').style.display = 'none';
+                document.getElementById('dorddiv').style.display = 'none';
+                document.getElementById('orderdiv').style.display = 'block';
             }
         }
     });
@@ -1000,7 +1014,7 @@
         calc()
     });
     
-    $(document).on("click", "#customerSave", function(){
+    $(document).on("click", "#customersave", function(){
         if ($('#toPayRadio').is(':checked')) {
             pay = $('#toPayRadio').val()
         } else {
@@ -1061,8 +1075,8 @@
         });
     }
     
-    $(document).on("click","#itemSave",function(){
-        if ($('#inclusive').checked) {
+    $(document).on("click","#itemsave",function(){
+        if ($('#inclusive').prop('checked')) {
             tax= $('#inclusive').val();
         } 
         else{
@@ -1130,35 +1144,44 @@
                 },
               
                 success: function(data){
-                    document.getElementById('cust_email').value = data.email;
-                    document.getElementById('dcust_email').value = data.email;
                     if (data.phno == ''){
-                        console.log(1)
-                        document.getElementById('dphonediv').style.display = 'none';
-                        document.getElementById('phonediv').style.display = 'none';
+                        if(data.address == ''){
+                            document.getElementById('daddressdiv').style.display = 'none';
+                            document.getElementById('addressdiv').style.display = 'none';
+                            document.getElementById('phonediv').style.display = 'none';
+                            document.getElementById('dorddiv').style.display = 'block';
+                            document.getElementById('orderdiv').style.display = 'none';
+                            document.getElementById('ddorddiv').style.display = 'none';
+                        }else{
+                            document.getElementById('daddressdiv').style.display = 'block';
+                            document.getElementById('addressdiv').style.display = 'none';
+                            document.getElementById('phonediv').style.display = 'none';
+                            document.getElementById('orderdiv').style.display = 'block';
+                            document.getElementById('dorddiv').style.display = 'none';
+                            document.getElementById('ddorddiv').style.display = 'none';
+                            document.getElementById('dbname').value = data.address;
+                        }
                     }else{
                         if(data.address == ''){
-                            document.getElementById('dphonediv').style.display = 'block';
-                            document.getElementById('phonediv').style.display = 'none';
-                            document.getElementById('cust_phno').value = data.phno;
-                            document.getElementById('dcust_phno').value = data.phno;
-                        }else{
-                            document.getElementById('dphonediv').style.display = 'none';
+                            document.getElementById('daddressdiv').style.display = 'none';
+                            document.getElementById('addressdiv').style.display = 'none';
                             document.getElementById('phonediv').style.display = 'block';
                             document.getElementById('cust_phno').value = data.phno;
-                            document.getElementById('dcust_phno').value = data.phno;
+                            document.getElementById('ddorddiv').style.display = 'block';
+                            document.getElementById('dorddiv').style.display = 'none';
+                            document.getElementById('orderdiv').style.display = 'none';
+                        }else{
+                            document.getElementById('daddressdiv').style.display = 'none';
+                            document.getElementById('addressdiv').style.display = 'block';
+                            document.getElementById('phonediv').style.display = 'block';
+                            document.getElementById('bname').value = data.address;
+                            document.getElementById('cust_phno').value = data.phno;
+                            document.getElementById('ddorddiv').style.display = 'none';
+                            document.getElementById('dorddiv').style.display = 'none';
+                            document.getElementById('orderdiv').style.display = 'block';
                         }
                     }
-                    if (data.address == ''){
-                        document.getElementById('emaildiv').style.display = 'none';
-                        document.getElementById('demaildiv').style.display = 'block';
-                        document.getElementById('addressdiv').style.display = 'none';
-                    }else{
-                        document.getElementById('demaildiv').style.display = 'none';
-                        document.getElementById('emaildiv').style.display = 'block';
-                        document.getElementById('addressdiv').style.display = 'block';
-                        document.getElementById('bname').value = data.address;
-                    }
+
                     if(data.pay == 'To Pay'){
                         document.getElementById('balancediv').style.display = 'block';
                         document.getElementById('balval').innerText = data.bal;
@@ -1184,7 +1207,7 @@
                     <td style="width:21%">
                         <div class="d-flex">
                             <select name='product[]' id="product${roinc}" class="form-control border-secondary product"  onchange="changeprd(this.id)" style="color: black; background-color: white;">
-                                <option value=" " selected hidden>Select Product</option>
+                                <option value="" selected hidden>Select Product</option>
                                 {% for i in item %}
                                     {% if i.cid_id == cmp.cid %}
                                         <option  value="{{ i.id  }}">{{ i.item_name  }} </option>
@@ -1203,9 +1226,7 @@
                     </td>
 
                     <td style="width:13%">
-                        <input type="number" name='qty[]' value=0 id="qty${roinc}" class="form-control border-secondary qty mb-1" step=0 min=0 style="color: black; background-color: white;" onchange="changeqty(this.id)" />
-                        <input type="text" id="avl${roinc}" style="display: none;">
-                        <div class='d-flex' style="color: black; font-size: small;"><span>Available Qty : <span id="qtyspan${roinc}"class=''></span></span></div>
+                        <input type="number" name='qty[]' value=0 id="qty${roinc}" class="form-control border-secondary qty mb-1" step=0 min=0 style="color: black; background-color: white;" />
                     </td>
 
                     <td tyle="width:12%">
@@ -1216,7 +1237,7 @@
                         <input type="text" id="intrataxval${roinc}" hidden>
                         <input type="text" id="intertaxval${roinc}" hidden>
                         <input type="text"  id="select_tax${roinc}" placeholder="Tax Rate" class="form-control border-secondary seltax" readonly style="color: black; background-color: white;">
-                        <select name='tax1[]' id="tax1${roinc}" class="form-control border-secondary tax intra_tax d-none" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                        <select name='tax1[]' id="tax1${roinc}" class="form-control border-secondary tax intra_tax d-none" style="color: black; background-color: white;">
                             <option  value=" " selected hidden>Select Tax</option>
                             <option value="GST0[0%]" >GST0[0%]</option>
                             <option value="GST3[3%]">GST3[3%]</option>
@@ -1225,7 +1246,7 @@
                             <option value="GST13[18%]">GST18[18%]</option>
                             <option value="GST28[28%]">GST28[28%]</option>
                         </select>
-                        <select name='tax2[]' id="tax2${roinc}" class="form-control border-secondary tax inter_tax d-none" onchange="taxchange(this.id)" style="color: black; background-color: white;">
+                        <select name='tax2[]' id="tax2${roinc}" class="form-control border-secondary tax inter_tax d-none" style="color: black; background-color: white;">
                             <option  value=" " selected hidden>Select Tax</option>
                             <option value="IGST0[0%]" >IGST0[0%]</option>
                             <option value="IGST3[3%]">IGST3[3%]</option>
@@ -1234,8 +1255,6 @@
                             <option value="IGST18[18%]">IGST18[18%]</option>
                             <option value="IGST28[28%]">IGST28[28%]</option>
                         </select>
-                        <input type="text" style="display: none;" id="tax_percent${roinc}" >
-                        <div class="mt-1" style=" text-align: center;color: red;" ><span id="invalidtax${roinc}" style="display: none;"> Tax % Changed</span> </div> 
                     </td>  
 
                     <td tyle="width:10%">
@@ -1275,8 +1294,6 @@
                 data5 = response.igst
 
                 document.getElementById('hsn'+n).value = data;
-                document.getElementById('avl'+n).innerHTML = data2;
-                document.getElementById('qtyspan'+n).innerHTML = data2;
                 document.getElementById('unit'+n).value = data3;
                 document.getElementById('intrataxval'+n).value = data4;
                 document.getElementById('intertaxval'+n).value = data5;
@@ -1290,10 +1307,8 @@
                     $(`#tax1${n}`).addClass('d-flex');
                     if (data4 != ' '){
                         document.getElementById('tax1'+n).value = data4;
-                        document.getElementById('tax_percent'+n).value = data4;
                     }else{
                         document.getElementById('tax1'+n).value = ' ';
-                        document.getElementById('tax_percent'+n).value = ' ';
                     }
                             
                 } else {
@@ -1304,10 +1319,8 @@
                     $(`#tax2${n}`).addClass('d-flex');
                     if(data5 != ' '){
                         document.getElementById('tax2'+n).value = data5;
-                        document.getElementById('tax_percent'+n).value = data5;
                     }else{
                         document.getElementById('tax2'+n).value = ' ';
-                        document.getElementById('tax_percent'+n).value = ' ';
                     }
                 }
             },
@@ -1317,6 +1330,12 @@
     $(document).on('click','.remove_row',function(){
         var row_id = $(this).attr("id");
         $('#addr0'+row_id+'').remove();
+        var table = document.getElementById('tab_logic');
+        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].getElementsByTagName('td');
+            cells[0].innerText = i + 1;
+        }
         calc();
     });
             
@@ -1343,13 +1362,11 @@
         });
         originalRow.after(clonedRow);
         var table = document.getElementById('tab_logic');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-    // Iterate through each row and update the Sl No
-    for (var i = 0; i < rows.length; i++) {
-        var cells = rows[i].getElementsByTagName('td');
-        cells[0].innerText = i + 1;
-    }
+        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].getElementsByTagName('td');
+            cells[0].innerText = i + 1;
+        }
         calc();
     });
 

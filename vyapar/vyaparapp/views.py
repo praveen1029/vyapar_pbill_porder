@@ -1482,6 +1482,8 @@ def import_purchase_bill(request):
           pbill.balance=balance
           pbill.save()
 
+        PurchaseBillTransactionHistory.objects.create(purchasebill=pbill,staff=pbill.staff,company=pbill.company,action='Created')
+
       return JsonResponse({'message': 'File uploaded successfully!'})
   else:
     return JsonResponse({'message': 'File upload Failed!'})
@@ -1582,6 +1584,7 @@ def create_purchaseorder(request):
     last_ord.tot_ord_no = last_ord.orderno
     last_ord.save()
 
+    PurchaseOrderTransactionHistory.objects.create(purchaseorder=pord,staff=staff,company=cmp,action='Created')
 
     if 'Next' in request.POST:
       return redirect('add_purchaseorder')
@@ -1679,6 +1682,7 @@ def update_purchaseorder(request,id):
         for ele in mapped:
             PurchaseOrderItem.objects.filter(id=ele[5],company=cmp).update(product = ele[0],qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4])
 
+    PurchaseOrderTransactionHistory.objects.create(purchaseorder=pord,staff=staff,company=cmp,action='Updated')
     return redirect('view_purchaseorder')
 
   return redirect('view_purchaseorder')
@@ -1697,6 +1701,163 @@ def details_purchaseorder(request,id):
 
   context={'staff':staff,'allmodules':allmodules,'pord':pord,'oitm':oitm,'itm_len':itm_len,'dis':dis}
   return render(request,'staff/purchaseorderdetails.html',context)
+
+
+def delete_purchaseorder(request,id):
+  pord = PurchaseOrder.objects.get(billno=id)
+  PurchaseOrderItem.objects.get(purchasebill=pord).delete()
+  pord.delete()
+  return redirect('view_purchaseorder')
+
+
+def orderhistory(request):
+  pid = request.POST['id']
+  pord = PurchaseOrder.objects.get(orderno=pid)
+  hst = PurchaseOrderTransactionHistory.objects.filter(purchaseorder=pord).last()
+  name = hst.staff.first_name + ' ' + hst.staff.last_name 
+  action = hst.action
+  return JsonResponse({'name':name,'action':action,'pid':pid})
+
+
+def convert_to_bill(request,id):
+  pord = PurchaseOrder.objects.get(orderno=id)
+  bno = PurchaseBill.objects.last().tot_bill_no              
+
+  pbill = PurchaseBill(party=pord.party,company=pord.company,staff=pord.staff,
+                      billdate=pord.orderdate,duedate=pord.duedate,
+                      supplyplace=pord.supplyplace,
+                      subtotal=pord.subtotal,
+                      igst = pord.igst,
+                      cgst = pord.cgst,
+                      sgst = pord.sgst,
+                      taxamount = pord.taxamount,
+                      grandtotal=pord.grandtotal,
+                      balance=pord.balance,
+                      pay_method = pord.pay_method,
+                      cheque_no = pord.cheque_no,
+                      upi_no = pord.upi_no,
+                      advance=pord.advance,
+                      tot_bill_no = bno)
+  pbill.save()
+
+  PurchaseBill.objects.all().update(tot_bill_no=F('tot_bill_no') + 1)
+
+  orditm = PurchaseOrderItem.objects.filter(purchaseorder=id)
+  
+  for item in orditm:
+    billitm = PurchaseBillItem(purchasebill=pbill, qty =item.qty, total =item.total ,
+                            company=item.company, product =item.product , tax= item.tax ,discount =item.discount )
+    billitm.save()
+
+  PurchaseBillTransactionHistory.objects.create(purchasebill=pbill,staff=pbill.staff,company=pbill.company,action='Created')
+  pord.convert = 1
+  pord.convert_id = pbill
+  pord.save()
+  
+  return redirect('view_purchaseorder') 
+
+
+def import_purchase_order(request):
+  if request.method == 'POST' and request.FILES['ordfile']  and request.FILES['prdfile']:
+    sid = request.session.get('staff_id')
+    staff =  staff_details.objects.get(id=sid)
+    cmp = company.objects.get(id=staff.company.id)
+    totval = int(PurchaseOrder.objects.last().tot_ord_no)
+
+    excel_bill = request.FILES['ordfile']
+    excel_b = load_workbook(excel_bill)
+    eb = excel_b['Sheet1']
+    excel_prd = request.FILES['prdfile']
+    excel_p = load_workbook(excel_prd)
+    ep = excel_p['Sheet1']
+
+    for row_number1 in range(2, eb.max_row + 1):
+      billsheet = [eb.cell(row=row_number1, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+      part = party.objects.get(party_name=billsheet[0],email=billsheet[1],company=cmp)
+      PurchaseOrder.objects.create(party=part, 
+                                  orderdate=billsheet[2],
+                                  duedate=billsheet[3],
+                                  supplyplace =billsheet[4],
+                                  tot_ord_no = totval+1,
+                                  company=cmp,staff=staff)
+      
+      pord = PurchaseOrder.objects.last()
+      if billsheet[5] == 'Cheque':
+        pord.cheque_no = billsheet[5]
+      elif billsheet[5] == 'UPI':
+        pord.upi_no = billsheet[5]
+      else:
+        if billsheet[5] != 'Cash':
+          bank = BankModel.objects.get(bank_name=billsheet[5],company=cmp)
+          pord.pay_method = bank
+      pord.save()
+
+      PurchaseOrder.objects.all().update(tot_ord_no=totval + 1)
+      totval += 1
+      subtotal = 0
+      taxamount=0
+      for row_number2 in range(2, ep.max_row + 1):
+        prdsheet = [ep.cell(row=row_number2, column=col_num).value for col_num in range(1, ep.max_column + 1)]
+        if prdsheet[0] == row_number1:
+          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=prdsheet[2])
+          temp = prdsheet[4].split('[')
+          if billsheet[3] =='State':
+            tax=int(temp[0][3:])
+          else:
+            tax=int(temp[0][4:])
+
+          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[5])
+          subtotal += total
+          tamount = total *(tax / 100)
+          taxamount += tamount 
+          PurchaseOrderItem.objects.create(purchaseorder=pord,
+                                          company=cmp,
+                                          product=itm,
+                                          qty=prdsheet[3],
+                                          tax=prdsheet[4],
+                                          discount=prdsheet[5],
+                                          total=total)
+                
+          if billsheet[4]=='State':
+            gst = round((taxamount/2),2)
+            pord.sgst=gst
+            pord.cgst=gst
+            pord.igst=0
+
+          else:
+            gst=round(taxamount,2)
+            pord.igst=gst
+            pord.cgst=0
+            pord.sgst=0
+
+          gtotal = subtotal + taxamount + float(billsheet[7])
+          balance = gtotal- float(billsheet[8])
+          gtotal = round(gtotal,2)
+          balance = round(balance,2)
+
+          pord.subtotal=round(subtotal,2)
+          pord.taxamount=round(taxamount,2)
+          pord.adjust=round(billsheet[7],2)
+          pord.grandtotal=gtotal
+          pord.advance=round(billsheet[8],2)
+          pord.balance=balance
+          pord.save()
+
+      PurchaseBillTransactionHistory.objects.create(purchaseorder=pord,staff=pord.staff,company=pord.company,action='Created')
+
+      return JsonResponse({'message': 'File uploaded successfully!'})
+  else:
+    return JsonResponse({'message': 'File upload Failed!'})
+
+
+def history_purchaseorder(request,id):
+  sid = request.session.get('staff_id')
+  staff =  staff_details.objects.get(id=sid)
+  allmodules= modules_list.objects.get(company=staff.company,status='New')
+  hst= PurchaseOrderTransactionHistory.objects.filter(purchaseorder=id)
+
+  context = {'staff':staff,'allmodules':allmodules,'hst':hst,'id':id}
+  return render(request,'staff/purchaseorderhistory.html',context)
 
 
 def bankdata(request):
@@ -1764,7 +1925,7 @@ def saveitem(request):
   intra_st = request.POST['intra_st']
   inter_st = request.POST['inter_st']
 
-  if intra_st != 'Taxable':
+  if taxref != 'Taxable':
     intra_st = 'GST0[0%]'
     inter_st = 'IGST0[0%]'
 
@@ -1796,12 +1957,11 @@ def item_dropdown(request):
 def custdata(request):
   cid = request.POST['id']
   part = party.objects.get(id=cid)
-  email = part.email
   phno = part.contact
   address = part.address
   pay = part.payment
   bal = part.openingbalance
-  return JsonResponse({'email':email, 'phno':phno, 'address':address, 'pay':pay, 'bal':bal})
+  return JsonResponse({'phno':phno, 'address':address, 'pay':pay, 'bal':bal})
 
 
 def itemdetails(request):
