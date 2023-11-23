@@ -144,11 +144,17 @@
         #calcdiv{
             visibility: visible;
             margin-top: -30vh;
-            margin-left: -5vh;
+            margin-left: -9vh;
+            margin-bottom: 30vh;
         }
 
         #billtable{
             margin-top: 20vh;
+            margin-bottom: 20vh;
+        }
+
+        #billtable th{
+            font-size: medium;
         }
 
         .extra{
@@ -224,7 +230,6 @@
                             <div class="paiddiv">
                                 <p style="margin-bottom: 5px;"> Paid</p>
                                 <p style="font-size:large;"> &#8377; <span id="paidval"></span></p>
-                                
                             </div>
                             <div class="tplus">
                                 <i class="fa fa-plus border-dark " aria-hidden="true" style="color: black;"></i>
@@ -234,7 +239,6 @@
                                 <p style="font-size:large;"> &#8377; <span id="unpaidval"></span></p>
                             </div>
                             <div class="tequal">
-
                                 <i class="fa-solid fa fa-equals" style="color: black;"></i>
                             </div>
                             <div class="totaldiv">
@@ -272,10 +276,10 @@
                             <div class="mt-3" style="overflow: scroll;height: 28rem; width: 97%;" id="tablediv">
                                 <table class="table table-bordered table-info table-striped tb table-responsive w-100" id="billtable"  style="text-align: center;">
                                     <thead >
-                                        <tr class="fs-2 tb" >
+                                        <tr class="fs-2 tb">
                                             <th class="bg-secondary text-white">
                                                 DATE 
-                                                &nbsp; <a onclick="toggleDropdown(0)"><i class="fa fa-filter" aria-hidden="true"></i></a>
+                                                <a class="extra text-white" onclick="toggleDropdown(0)">&nbsp;<i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent0">
                                                     <label for="filterInput0" style="color: black; text-align: left;">Equal To</label>
                                                     <input type="date" id="filterInput0"  />
@@ -285,7 +289,7 @@
                                             </th>
                                             <th class="bg-secondary text-white">
                                                 BILL NO 
-                                                &nbsp; <a onclick="toggleDropdown(1)"><i class="fa fa-filter" aria-hidden="true"></i></a>
+                                                <a class="extra text-white" onclick="toggleDropdown(1)">&nbsp;<i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent1">
                                                     <label for="filterInput1" style="color: black; text-align: left;">Equal To</label>
                                                     <input type="text" id="filterInput1"  />
@@ -295,18 +299,17 @@
                                             </th>
                                             <th class="bg-secondary text-white">
                                                 PARTY NAME 
-                                                &nbsp; <a onclick="toggleDropdown(2)"><i class="fa fa-filter" aria-hidden="true"></i></a>
+                                                <a class="extra text-white" onclick="toggleDropdown(2)">&nbsp;<i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent2">
                                                     <label for="filterInput2" style="color: black; text-align: left;">Equal To</label>
                                                     <input type="text" id="filterInput2"  />
                                                     <a class="btn btn-info" onclick="cleardropdown(2)">Clear</a> 
                                                     &nbsp;<a class="btn btn-info" onclick="filterTable(2)">Apply</a>
                                                 </div>
-
                                             </th>
                                             <th class="bg-secondary text-white">
                                                 PAYMENT TYPE
-                                                &nbsp; <a onclick="toggleDropdown(3)"><i class="fa fa-filter" aria-hidden="true"></i></a>
+                                                <a class="extra text-white" onclick="toggleDropdown(3)">&nbsp;<i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent3">
                                                     <label for="filterInput3" style="color: black; text-align: left;">Equal To</label>
                                                     <input type="text" id="filterInput3"  />
@@ -316,7 +319,7 @@
                                             </th>
                                             <th class="bg-secondary text-white">
                                                 AMOUNT
-                                                &nbsp; <a onclick="toggleDropdown(4)"><i class="fa fa-filter" aria-hidden="true"></i></a>
+                                                <a class="extra text-white" onclick="toggleDropdown(4)">&nbsp;<i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent4">
                                                     <label for="filterInput4" style="color: black; text-align: left;">Equal To</label>
                                                     <input type="text" id="filterInput4" />
@@ -326,7 +329,7 @@
                                             </th>
                                             <th class="bg-secondary text-white">
                                                 BALANCE
-                                                &nbsp; <a onclick="toggleDropdown(5)"><i class="fa fa-filter" aria-hidden="true"></i></a>
+                                                <a class="extra text-white" onclick="toggleDropdown(5)">&nbsp;<i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent5">
                                                     <label for="filterInput5" style="color: black; text-align: left;">Equal To</label>
                                                     <input type="text" id="filterInput5" />
@@ -334,7 +337,7 @@
                                                     &nbsp;<a class="btn btn-info" onclick="filterTable(5)">Apply</a>
                                                 </div>
                                             </th>
-                                            <th class="bg-secondary text-white">
+                                            <th class="bg-secondary text-white extra">
                                                 ACTION
                                                 &nbsp; <a onclick="toggleDropdown(6)"><i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent6">
@@ -344,7 +347,7 @@
                                                     &nbsp;<a class="btn btn-info" onclick="filterTable(6)">Apply</a>
                                                 </div>
                                             </th>
-                                            <th class="bg-secondary text-white">
+                                            <th class="bg-secondary text-white extra">
                                                 BY
                                                 &nbsp; <a onclick="toggleDropdown(7)"><i class="fa fa-filter" aria-hidden="true"></i></a>
                                                 <div class="dropdown-content" id="dropdownContent7">
@@ -365,9 +368,9 @@
                                             <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.party.party_name}}</td>
                                             <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.pay_method}}</td>
                                             <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.grandtotal}}</td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.party.openingbalance}}</td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}"></td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}"></td>
+                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.balance}}</td>
+                                            <td class="clickable-row extra" style="color: black;" data-href="details_purchasebill/{{ p.billno }}"></td>
+                                            <td class="clickable-row extra" style="color: black;" data-href="details_purchasebill/{{ p.billno }}"></td>
                                             <td class="pt-3 m-0 extra">
                                                 <div class="btn-group">
                                                     <button style="border: none;background: none;" type="button" class="ropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
@@ -382,7 +385,6 @@
                                                 </div>
                                             </td>
                                             <td style="color: black;" hidden>{{p.advance}}</td>
-                                            <td style="color: black;" hidden>{{p.balance}}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -393,7 +395,32 @@
                                     No Transactions to Show
                                 </p>
 
-                                <table id="billtablemodel" style="display: none;">
+                                <table id="excelbilltable" hidden>
+                                    <thead >
+                                        <tr class="fs-2 tb" >
+                                            <th> DATE </th>
+                                            <th> BILL NO </th>
+                                            <th> PARTY NAME </th>
+                                            <th> PAYMENT TYPE </th>
+                                            <th> AMOUNT </th>
+                                            <th> BALANCE </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p in pbill %}
+                                        <tr>
+                                            <td>{{p.billdate | date:'d-m-Y'}} </td>
+                                            <td>{{p.billno}} </td>
+                                            <td>{{p.party.party_name}} </td>
+                                            <td>{{p.pay_method}} </td>
+                                            <td>{{p.grandtotal}} </td>
+                                            <td>{{p.balance}} </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                                <table id="billtablemodel" hidden>
                                     <thead>
                                         <tr>
                                             <th>Customer Name</th>
@@ -420,7 +447,7 @@
                                     </tbody>
                                 </table>
 
-                                <table id="billtableitemmodel" style="display: none;">
+                                <table id="billtableitemmodel" hidden>
                                     <thead>
                                         <tr>
                                             <th>Purchase Bill</th>
@@ -573,9 +600,13 @@
         }else{
             var printContents = document.getElementById("whatToPrint").innerHTML;
         }
-        var $printerDiv = $('<div class="printContainer"></div>');
+        var $printerDiv = $('<div class="printContainer" id=printContainer></div>');
         $printerDiv.html(printContents); 
         $('body').append($printerDiv).addClass("printingContent"); 
+        var h1Element = document.createElement("h1");
+        h1Element.textContent = "Purchase Bills";
+        var head = document.getElementById("printContainer");
+        head.insertBefore(h1Element, head.firstChild);
         window.print();
         $printerDiv.remove();
         $('body').removeClass("printingContent");
@@ -597,7 +628,7 @@
                 var ptextValue = pcells.textContent || pcells.innerText;
                 tpaid += parseFloat(ptextValue)
 
-                var ucells = rows[i].getElementsByTagName('td')[10];
+                var ucells = rows[i].getElementsByTagName('td')[5];
                 var utextValue = ucells.textContent || ucells.innerText;
                 tunpaid += parseFloat(utextValue)
 
@@ -786,7 +817,7 @@
 
 <script>
     function ExportToExcel(){
-        const table = document.querySelector('#billtable');
+        const table = document.querySelector('#excelbilltable');
         const ws = XLSX.utils.table_to_sheet(table);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
