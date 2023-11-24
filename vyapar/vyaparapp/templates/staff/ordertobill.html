@@ -67,14 +67,14 @@
                 </div>
                 <p></p>
 
-                <form action="{% url 'update_purchaseorder' pord.id %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchaseorder()">
+                <form action="{% url 'bill_to_order' pord.id %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchasebill()">
                     {% csrf_token %}
                     <div class="page-content">
                         <div class="card radius-15">
                             <div class="card-body bg-light">
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <h3 class="mb-3">EDIT &nbsp; PURCHASE &nbsp; ORDER</h3>
+                                        <h3 class="mb-3">EDIT &nbsp; PURCHASE &nbsp; BILL</h3>
                                     </div>
                                     <div class="col-md-7"></div>
                                     <div class="col-md-1">
@@ -110,9 +110,9 @@
                                                     &nbsp;<span id="balancediv" style=" color: black;"> Available Balance : <span id="balval" style="color: green;">{{pord.party.openingbalance}}</span></span>
                                                 </div> 
                                             {% endif %}
-                                            <div id="orderdiv">
-                                                <label class="col-form-label">Order No.</label>
-                                                <input type="text" class="form-control border-secondary" name="ord_no"  id="ord_no" value="{{pord.orderno}}"  style="color: black;background-color: white;" readonly> <br>
+                                            <div id="billdiv">
+                                                <label class="col-form-label">Bill No.</label>
+                                                <input type="text" class="form-control border-secondary" name="bill_no"  id="bill_no" value="{{bill_no}}"  style="color: black;background-color: white;" readonly> <br>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
@@ -120,29 +120,30 @@
                                                 <label class="col-form-label">Phone No. </label>
                                                 <input class="form-control border-secondary" name="phno" required  id="cust_phno"  style="color: black;background-color: white;" value="{{pord.party.contact}}" readonly>
                                             </div>
-                                            <div id="dorddiv" style="display: none;">
-                                                <label class="col-form-label">Order No.</label>
-                                                <input type="text" class="form-control border-secondary" value="{{pord.orderno}}"  style="color: black;background-color: white;" readonly> <br>
+                                            <div id="dbilldiv" style="display: none;">
+                                                <label class="col-form-label">Bill No.</label>
+                                                <input type="text" class="form-control border-secondary" value="{{bill_no}}"  style="color: black;background-color: white;" readonly> <br>
                                             </div>
                                             <div id="daddressdiv" style="display: none;">
                                                 <label class="col-form-label">Billing Address</label>
-                                                <textarea class="form-control border-secondary mb-3" name="dbname" id="dbname" rows="6" type="text" style="color: black;background-color: white;" readonly></textarea>
+                                                <textarea class="form-control border-secondary mb-3" name="dbname" id="dbname" rows="6" type="text" style="color: black;background-color: white;" readonly>{{ pord.party.address }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-4" id="addressdiv">
                                             <label class="col-form-label">Billing Address</label>
                                             <textarea class="form-control border-secondary  mb-3" name="bname" id="bname" rows="6" type="text"style="color: black;background-color: white;">{{ pord.party.address }}</textarea>
                                         </div>
-                                        <div class="col-md-4" id="ddorddiv" style="display: none;">
-                                            <label class="col-form-label">Order No.</label>
-                                            <input type="text" class="form-control border-secondary" value="{{pord.orderno}}"  style="color: black;background-color: white;" readonly> <br>
+                                        <div class="col-md-4" id="ddbilldiv" style="display: none;">
+                                            <label class="col-form-label">Bill No.</label>
+                                            <input type="text" class="form-control border-secondary" value="{{bill_no}}"  style="color: black;background-color: white;" readonly> <br>
                                         </div>
                                     </div>
                                     <br>
+
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <label class="col-form-label">Order Date:</label>
-                                            <input type="date" class="form-control border-secondary" style="color: black; background-color: white;" name="orderdate" id="orderdate" value="{{bdate}}">
+                                            <label class="col-form-label">Bill Date:</label>
+                                            <input type="date" class="form-control border-secondary" style="color: black; background-color: white;" name="billdate" id="billdate" value="{{bdate}}">
                                             <br>
                                         </div>
                                         <div class="col-md-4">
@@ -158,9 +159,6 @@
                                                 <option value="Other State">Other State</option>
                                             </select>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="row">
                                         <div class="col-md-4">
                                             {% if pord.pay_method != 'Cash' and pord.pay_method != 'Cheque' and pord.pay_method != 'UPI' %}
                                             <label class="col-form-label">Payment Method</label>
@@ -186,6 +184,9 @@
                                                 </select>
                                             {% endif %}
                                         </div>
+                                    </div>
+                                    
+                                    <div class="row">
                                         {% if pord.cheque_no %}
                                             <div class="col-md-4" id="chequediv">
                                                 <label class="col-form-label" >Cheque ID</label>
@@ -255,7 +256,6 @@
                                                                             <option value="{{ i.id }}" >{{ i.item_name  }} </option>
                                                                         {% endif %}
                                                                     {% endfor %}
-                                                                    
                                                                 </select>&nbsp;&nbsp;&nbsp;
                                                                 <button id="modal_closing" type="button" class="btn btn-outline-info " data-bs-toggle="modal" data-bs-target="#newitem" data-bs-whatever="@mdo">
                                                                     <span class="fa fa-plus"></span>
@@ -940,7 +940,7 @@
 </script>
 
 <script>
-    function validatepurchaseorder() {
+    function validatepurchasebill() {
         var customer = document.getElementById('customer').value;
         var plosu = document.getElementById('plosu').value;
         var pay_method = document.getElementById('pay_method').value;
@@ -1103,16 +1103,16 @@
                 document.getElementById('daddressdiv').style.display = 'none';
                 document.getElementById('addressdiv').style.display = 'none';
                 document.getElementById('phonediv').style.display = 'none';
-                document.getElementById('dorddiv').style.display = 'block';
-                document.getElementById('orderdiv').style.display = 'none';
-                document.getElementById('ddorddiv').style.display = 'none';
+                document.getElementById('dbilldiv').style.display = 'block';
+                document.getElementById('billdiv').style.display = 'none';
+                document.getElementById('ddbilldiv').style.display = 'none';
             }else{
                 document.getElementById('daddressdiv').style.display = 'block';
                 document.getElementById('addressdiv').style.display = 'none';
                 document.getElementById('phonediv').style.display = 'none';
-                document.getElementById('orderdiv').style.display = 'block';
-                document.getElementById('dorddiv').style.display = 'none';
-                document.getElementById('ddorddiv').style.display = 'none';
+                document.getElementById('billdiv').style.display = 'block';
+                document.getElementById('dbilldiv').style.display = 'none';
+                document.getElementById('ddbilldiv').style.display = 'none';
                 document.getElementById('dbname').value = address;
             }
         }else{
@@ -1121,25 +1121,25 @@
                 document.getElementById('addressdiv').style.display = 'none';
                 document.getElementById('phonediv').style.display = 'block';
                 document.getElementById('cust_phno').value = contact;
-                document.getElementById('ddorddiv').style.display = 'block';
-                document.getElementById('dorddiv').style.display = 'none';
-                document.getElementById('orderdiv').style.display = 'none';
+                document.getElementById('ddbilldiv').style.display = 'block';
+                document.getElementById('dbilldiv').style.display = 'none';
+                document.getElementById('billdiv').style.display = 'none';
             }else{
                 document.getElementById('daddressdiv').style.display = 'none';
                 document.getElementById('addressdiv').style.display = 'block';
                 document.getElementById('phonediv').style.display = 'block';
                 document.getElementById('bname').value = address;
                 document.getElementById('cust_phno').value = contact;
-                document.getElementById('ddorddiv').style.display = 'none';
-                document.getElementById('dorddiv').style.display = 'none';
-                document.getElementById('orderdiv').style.display = 'block';
+                document.getElementById('ddbilldiv').style.display = 'none';
+                document.getElementById('dbilldiv').style.display = 'none';
+                document.getElementById('billdiv').style.display = 'block';
             }
         }
     });
 </script>
 
 <script>
-
+    
     $(document).on("change", "#plosu", function(){
         var taxes = document.getElementsByClassName('seltax');
         for (var i = 0; i < taxes.length; i++) {
@@ -1283,6 +1283,7 @@
     });
     
     function reloadItem() {
+        var item_name = document.getElementById('item_name').value;
         $.ajax({
             url: "{% url 'item_dropdown' %}",
             type: "GET",
@@ -1308,7 +1309,6 @@
                     });
                 }
             },
-
             error: function(xhr, status, error) {
                 console.error(xhr.responseText);
             }
@@ -1331,16 +1331,16 @@
                             document.getElementById('daddressdiv').style.display = 'none';
                             document.getElementById('addressdiv').style.display = 'none';
                             document.getElementById('phonediv').style.display = 'none';
-                            document.getElementById('dorddiv').style.display = 'block';
-                            document.getElementById('orderdiv').style.display = 'none';
-                            document.getElementById('ddorddiv').style.display = 'none';
+                            document.getElementById('dbilldiv').style.display = 'block';
+                            document.getElementById('billdiv').style.display = 'none';
+                            document.getElementById('ddbilldiv').style.display = 'none';
                         }else{
                             document.getElementById('daddressdiv').style.display = 'block';
                             document.getElementById('addressdiv').style.display = 'none';
                             document.getElementById('phonediv').style.display = 'none';
-                            document.getElementById('orderdiv').style.display = 'block';
-                            document.getElementById('dorddiv').style.display = 'none';
-                            document.getElementById('ddorddiv').style.display = 'none';
+                            document.getElementById('billdiv').style.display = 'block';
+                            document.getElementById('dbilldiv').style.display = 'none';
+                            document.getElementById('ddbilldiv').style.display = 'none';
                             document.getElementById('dbname').value = data.address;
                         }
                     }else{
@@ -1349,21 +1349,21 @@
                             document.getElementById('addressdiv').style.display = 'none';
                             document.getElementById('phonediv').style.display = 'block';
                             document.getElementById('cust_phno').value = data.phno;
-                            document.getElementById('ddorddiv').style.display = 'block';
-                            document.getElementById('dorddiv').style.display = 'none';
-                            document.getElementById('orderdiv').style.display = 'none';
+                            document.getElementById('ddbilldiv').style.display = 'block';
+                            document.getElementById('dbilldiv').style.display = 'none';
+                            document.getElementById('billdiv').style.display = 'none';
                         }else{
                             document.getElementById('daddressdiv').style.display = 'none';
                             document.getElementById('addressdiv').style.display = 'block';
                             document.getElementById('phonediv').style.display = 'block';
                             document.getElementById('bname').value = data.address;
                             document.getElementById('cust_phno').value = data.phno;
-                            document.getElementById('ddorddiv').style.display = 'none';
-                            document.getElementById('dorddiv').style.display = 'none';
-                            document.getElementById('orderdiv').style.display = 'block';
+                            document.getElementById('ddbilldiv').style.display = 'none';
+                            document.getElementById('dbilldiv').style.display = 'none';
+                            document.getElementById('billdiv').style.display = 'block';
                         }
                     }
-
+                    
                     if(data.pay == 'To Pay'){
                         document.getElementById('balancediv').style.display = 'block';
                         document.getElementById('balval').innerText = data.bal;

@@ -157,7 +157,7 @@ class BankModel(models.Model):
 
 
 class PurchaseBill(models.Model):
-    billno = models.AutoField(('BILLID'), primary_key=True)
+    billno = models.IntegerField(default=0,null=True,blank=True)
     staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
     company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
     party = models.ForeignKey(party, on_delete=models.CASCADE)
@@ -200,7 +200,7 @@ class PurchaseBillTransactionHistory(models.Model):
 
 
 class PurchaseOrder(models.Model):
-    orderno = models.AutoField(('ORDID'), primary_key=True)
+    orderno = models.IntegerField(default=0,null=True,blank=True)
     staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
     company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
     party = models.ForeignKey(party, on_delete=models.CASCADE)

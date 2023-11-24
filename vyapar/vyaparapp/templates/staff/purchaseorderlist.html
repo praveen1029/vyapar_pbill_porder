@@ -337,34 +337,34 @@
                                         <tbody>
                                             {% for p in pord %}
                                             <tr>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">{{p.party.party_name}}</td>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">{{p.orderno}}</td>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">{{p.orderdate}}</td>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">{{p.duedate}}</td>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">{{p.grandtotal}}</td>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">{{p.balance}}</td>
-                                                <td class="clickable-row " style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">Purchase Order</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">{{p.party.party_name}}</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">{{p.orderno}}</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">{{p.orderdate}}</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">{{p.duedate}}</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">{{p.grandtotal}}</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">{{p.balance}}</td>
+                                                <td class="clickable-row " style="color: black;" data-href="details_purchaseorder/{{ p.id }}">Purchase Order</td>
                                                 {% if p.convert == 0 %}
-                                                <td class="clickable-row" style="color: #E4A11B;" data-href="details_purchaseorder/{{ p.orderno }}">Order Overdue</td>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">
-                                                    <a href="{% url 'convert_to_bill' p.orderno %}" class="btn btn-outline-secondary text-dark">Convert to Bill</a>
+                                                <td class="clickable-row" style="color: #E4A11B;" data-href="details_purchaseorder/{{ p.id }}">Order Overdue</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">
+                                                    <a href="{% url 'convert_to_bill' p.id %}" class="btn btn-outline-secondary text-dark">Convert to Bill</a>
                                                 </td>
                                                 {% else %}
-                                                <td class="clickable-row" style="color: green;" data-href="details_purchaseorder/{{ p.orderno }}">Order Completed</td>
-                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}">Converted To Bill No. {{p.convert_id.billno}}</td>
+                                                <td class="clickable-row" style="color: green;" data-href="details_purchaseorder/{{ p.id }}">Order Completed</td>
+                                                <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">Converted To Bill No. {{p.convert_id.billno}}</td>
                                                 {% endif %}
-                                                <td class="clickable-row extra" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}"></td>
-                                                <td class="clickable-row extra" style="color: black;" data-href="details_purchaseorder/{{ p.orderno }}"></td>
+                                                <td class="clickable-row extra" style="color: black;" data-href="details_purchaseorder/{{ p.id }}"></td>
+                                                <td class="clickable-row extra" style="color: black;" data-href="details_purchaseorder/{{ p.id }}"></td>
                                                 <td class="pt-3 m-0 extra">
                                                     <div class="btn-group">
                                                         <button style="border: none;background: none;" type="button" class="ropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                                                             <span class="fa fa-ellipsis-v text-dark fs-1 ps-"></span>
                                                         </button>
                                                         <ul class="dropdown-menu">
-                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'details_purchaseorder' p.orderno %}"><span class="fa fa-eye pe-2 tg"></span> View </a></li>
-                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'edit_purchaseorder' p.orderno %}"><span class="fa fa-edit pe-2 tj"></span> Edit</a></li>
-                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'history_purchaseorder' p.orderno %}"><span class="fa fa-history pe-2 th"></span> History</a></li>
-                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_d" onclick="deletepbill('{{p.orderno}}')"><span class="fa fa-trash-alt tr" style="padding-inline-start: 0.1rem;padding-inline-end:0.7rem ;"></span> Delete</a></li>
+                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'details_purchaseorder' p.id %}"><span class="fa fa-eye pe-2 tg"></span> View </a></li>
+                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'edit_purchaseorder' p.id %}"><span class="fa fa-edit pe-2 tj"></span> Edit</a></li>
+                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'history_purchaseorder' p.id %}"><span class="fa fa-history pe-2 th"></span> History</a></li>
+                                                          <li><a class="dropdown-item fw-bold tb hide_table_text_d" onclick="deletepord('{{p.id}}')"><span class="fa fa-trash-alt tr" style="padding-inline-start: 0.1rem;padding-inline-end:0.7rem ;"></span> Delete</a></li>
                                                         </ul>
                                                     </div>
                                                 </td>
@@ -516,19 +516,23 @@
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
         .then(data => {
             swal({
                 title: "Imported !",
-                text: "Purchase Bill Import Successfull!",
-                icon: "Success",
+                text: "Purchase Order Import Successfull!",
+                icon: "success",
                 buttons: false,
             })
+        })
+        .then(response => {
+            setTimeout(function () {
+                location.reload();
+            }, 1250);
         })
         .catch(error => {
             swal({
                 title: "Error !",
-                text: "Purchase Bill Import Unuccessfull!",
+                text: "Purchase Order Import Unuccessfull!",
                 icon: "warning",
                 buttons: false,
             })
@@ -622,15 +626,15 @@
         calculatetotal()
     }
 
-    function formatDateString(inputDate) {
-    const parsedDate = new Date(inputDate);
-    const day = parsedDate.getDate();
-    const month = parsedDate.getMonth() + 1;
-    const year = parsedDate.getFullYear();
-    const formattedDate = `${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}-${year}`;
-    return formattedDate;
-}
-
+    function formatDateString(inputDate) 
+    {
+        const parsedDate = new Date(inputDate);
+        const day = parsedDate.getDate();
+        const month = parsedDate.getMonth() + 1;
+        const year = parsedDate.getFullYear();
+        const formattedDate = `${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}-${year}`;
+        return formattedDate;
+    }
 </script>
 
 <script>
@@ -670,11 +674,11 @@
 </script>
 
 <script>
-    function deletepbill(Id)
+    function deletepord(Id)
     {
         swal({
             title: "Confirmation !",
-            text: "Do you want to Delete this Purchase Bill?",
+            text: "Do you want to Delete this Purchase Order?",
             icon: "warning",
             buttons: true,
             dangerMode: true,
@@ -683,7 +687,7 @@
             if (willDelete) {
                 swal({
                     title: "Deleted !",
-                    text: "Purchase Bill Deleted Successfully!",
+                    text: "Purchase Order Deleted Successfully!",
                     icon: "success",
                     buttons: false,
                 })

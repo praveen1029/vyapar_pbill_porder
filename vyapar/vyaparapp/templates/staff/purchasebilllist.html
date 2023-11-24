@@ -363,24 +363,24 @@
                                     <tbody>
                                         {% for p in pbill %}
                                         <tr>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.billdate | date:'d-m-Y'}}</td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.billno}}</td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.party.party_name}}</td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.pay_method}}</td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.grandtotal}}</td>
-                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.billno }}">{{p.balance}}</td>
-                                            <td class="clickable-row extra" style="color: black;" data-href="details_purchasebill/{{ p.billno }}"></td>
-                                            <td class="clickable-row extra" style="color: black;" data-href="details_purchasebill/{{ p.billno }}"></td>
+                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.id }}">{{p.billdate | date:'d-m-Y'}}</td>
+                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.id }}">{{p.billno}}</td>
+                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.id }}">{{p.party.party_name}}</td>
+                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.id }}">{{p.pay_method}}</td>
+                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.id }}">{{p.grandtotal}}</td>
+                                            <td class="clickable-row" style="color: black;" data-href="details_purchasebill/{{ p.id }}">{{p.balance}}</td>
+                                            <td class="clickable-row extra" style="color: black;" data-href="details_purchasebill/{{ p.id }}"></td>
+                                            <td class="clickable-row extra" style="color: black;" data-href="details_purchasebill/{{ p.id }}"></td>
                                             <td class="pt-3 m-0 extra">
                                                 <div class="btn-group">
                                                     <button style="border: none;background: none;" type="button" class="ropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                                                         <span class="fa fa-ellipsis-v text-dark fs-1 ps-"></span>
                                                     </button>
                                                     <ul class="dropdown-menu">
-                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'details_purchasebill' p.billno %}"><span class="fa fa-eye pe-2 tg"></span> View </a></li>
-                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'edit_purchasebill' p.billno %}"><span class="fa fa-edit pe-2 tj"></span> Edit</a></li>
-                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'history_purchasebill' p.billno %}"><span class="fa fa-history pe-2 th"></span> History</a></li>
-                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_d" onclick="deletepbill('{{p.billno}}')"><span class="fa fa-trash-alt tr" style="padding-inline-start: 0.1rem;padding-inline-end:0.7rem ;"></span> Delete</a></li>
+                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'details_purchasebill' p.id %}"><span class="fa fa-eye pe-2 tg"></span> View </a></li>
+                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'edit_purchasebill' p.id %}"><span class="fa fa-edit pe-2 tj"></span> Edit</a></li>
+                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_v" href="{% url 'history_purchasebill' p.id %}"><span class="fa fa-history pe-2 th"></span> History</a></li>
+                                                      <li><a class="dropdown-item fw-bold tb hide_table_text_d" onclick="deletepbill('{{p.id}}')"><span class="fa fa-trash-alt tr" style="padding-inline-start: 0.1rem;padding-inline-end:0.7rem ;"></span> Delete</a></li>
                                                     </ul>
                                                 </div>
                                             </td>
@@ -409,12 +409,12 @@
                                     <tbody>
                                         {% for p in pbill %}
                                         <tr>
-                                            <td>{{p.billdate | date:'d-m-Y'}} </td>
-                                            <td>{{p.billno}} </td>
-                                            <td>{{p.party.party_name}} </td>
-                                            <td>{{p.pay_method}} </td>
-                                            <td>{{p.grandtotal}} </td>
-                                            <td>{{p.balance}} </td>
+                                            <td>{{p.billdate | date:'d-m-Y'}}</td>
+                                            <td>{{p.billno}}</td>
+                                            <td>{{p.party.party_name}}</td>
+                                            <td>{{p.pay_method}}</td>
+                                            <td>{{p.grandtotal}}</td>
+                                            <td>{{p.balance}}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -534,6 +534,31 @@
             });
         }
     });
+
+    $(document).ready(function() {
+        var table = document.getElementById("excelbilltable");
+        var rows = table.getElementsByTagName("tr");
+        for (var i = 1; i < rows.length; i++) {
+            var bankid = rows[i].getElementsByTagName("td")[3].innerText;
+            if(bankid != 'Cash' && bankid != 'Cheque' && bankid != 'UPI'){
+                changetobankname(i,bankid)
+            }
+        }
+
+        function changetobankname(rowid,bankid){
+            $.ajax({
+                type : 'POST',
+                url: "{% url 'bankdata' %}",
+                data: {
+                    id: bankid,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                success: function(data){
+                    rows[rowid].getElementsByTagName("td")[3].innerText=data.bank_name
+                }
+            });
+        }
+    });
 </script>
 
 <script>
@@ -572,14 +597,18 @@
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
         .then(data => {
             swal({
                 title: "Imported !",
                 text: "Purchase Bill Import Successfull!",
-                icon: "Success",
+                icon: "success",
                 buttons: false,
             })
+        })
+        .then(response => {
+            setTimeout(function () {
+                location.reload();
+            }, 1250);
         })
         .catch(error => {
             swal({
@@ -709,14 +738,13 @@
     }
 
     function formatDateString(inputDate) {
-    const parsedDate = new Date(inputDate);
-    const day = parsedDate.getDate();
-    const month = parsedDate.getMonth() + 1;
-    const year = parsedDate.getFullYear();
-    const formattedDate = `${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}-${year}`;
-    return formattedDate;
-}
-
+        const parsedDate = new Date(inputDate);
+        const day = parsedDate.getDate();
+        const month = parsedDate.getMonth() + 1;
+        const year = parsedDate.getFullYear();
+        const formattedDate = `${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}-${year}`;
+        return formattedDate;
+    }
 </script>
 
 <script>

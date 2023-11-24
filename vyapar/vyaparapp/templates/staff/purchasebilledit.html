@@ -67,7 +67,7 @@
                 </div>
                 <p></p>
 
-                <form action="{% url 'update_purchasebill' pbill.billno %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchasebill()">
+                <form action="{% url 'update_purchasebill' pbill.id %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchasebill()">
                     {% csrf_token %}
                     <div class="page-content">
                         <div class="card radius-15">
@@ -204,7 +204,7 @@
                                                 <input type="text" class="form-control border-secondary" name="upi_id" id="upi_id" placeholder="Enter UPI ID" style="color: black;background-color: white;">
                                             </div>
                                         {% endif %}
-                                        {% if pbill.pay_method != 'Cash' %}
+                                        {% if pbill.pay_method != 'Cash' and pbill.pay_method != 'Cheque' and pbill.pay_method != 'UPI' %}
                                             <div class="col-md-4" id="bnkdiv" >
                                                 <label class="col-form-label" >Bank Account</label>
                                                 <input type="text" class="form-control border-secondary" name="bnk_id" id="bnk_id" value="{{bankno.account_num}}" style="color: black;background-color: white;" readonly>
@@ -251,7 +251,6 @@
                                                                             <option value="{{ i.id }}" >{{ i.item_name  }} </option>
                                                                         {% endif %}
                                                                     {% endfor %}
-                                                                    
                                                                 </select>&nbsp;&nbsp;&nbsp;
                                                                 <button id="modal_closing" type="button" class="btn btn-outline-info " data-bs-toggle="modal" data-bs-target="#newitem" data-bs-whatever="@mdo">
                                                                     <span class="fa fa-plus"></span>
@@ -573,11 +572,11 @@
                                                     <div class="d-flex">
                                                         <div class="w-50 me-3">
                                                             <label class="tb fw-bold" for="" style="color: black;">SALES PRICE</label><br>
-                                                            <input style="color: black;background-color: white;" id="saleprice" class="form-control fw-normal border-secondary  fs-3" type="number" name="saleprice" required>
+                                                            <input style="color: black;background-color: white;" id="saleprice" class="form-control fw-normal border-secondary  fs-3" type="number" name="saleprice" value="0">
                                                         </div>
                                                         <div class="w-50">
                                                             <label class="tb fw-bold" for="" style="color: black;">PURCHASE PRICE</label><br>
-                                                            <input style="color: black;background-color: white;" id="purprice" class="form-control fw-normal border-secondary  fs-3" type="number" name="purprice" required>
+                                                            <input style="color: black;background-color: white;" id="purprice" class="form-control fw-normal border-secondary  fs-3" type="number" name="purprice" value="0">
                                                         </div>
                                                     </div>
                                                     <div class="text-start mt-5">
@@ -595,22 +594,22 @@
                                                     <div class="d-flex">
                                                         <div class="w-50 me-3">
                                                         <label class="tb fw-bold" for="stock" style="color: black;">OPENING STOCK</label><br>
-                                                        <input style="color: black;background-color: white;" id="stock" class="form-control fw-normal border-secondary  fs-3" type="number" name="stock">
+                                                        <input style="color: black;background-color: white;" id="stock" class="form-control fw-normal border-secondary  fs-3" type="number" name="stock" value="0">
                                                         </div>
                                                         <div id="at_price_div" class="w-50">
                                                         <label class="tb fw-bold" for="itmprice" style="color: black;">AT PRICE</label><br>
-                                                        <input style="color: black;background-color: white" id="itmprice" class="form-control fw-normal border-secondary  fs-3" type="number" name="itmprice">
+                                                        <input style="color: black;background-color: white" id="itmprice" class="form-control fw-normal border-secondary  fs-3" type="number" name="itmprice" value="0">
                                                         </div>
                                                     </div>
                                                     <br>
                                                     <div class="d-flex">
                                                         <div class="w-50 me-3">
                                                         <label class="tb fw-bold" for="itmdate" style="color: black;">DATE</label><br>
-                                                        <input style="color: black;background-color: white" id="itmdate" class="form-control fw-normal border-secondary  fs-3" type="date" required name="itmdate">
+                                                        <input style="color: black;background-color: white" id="itmdate" class="form-control fw-normal border-secondary  fs-3" type="date" required name="itmdate" value="{{tod}}">
                                                         </div>
                                                         <div class="w-50">
                                                         <label class="tb fw-bold" for="minstock" style="color: black;">MINIMUM STOCK TO MAINTAIN</label><br>
-                                                        <input style="color: black;background-color: white" id="minstock" class="form-control fw-normal border-secondary  fs-3" type="number" name="minstock">
+                                                        <input style="color: black;background-color: white" id="minstock" class="form-control fw-normal border-secondary  fs-3" type="number" name="minstock" value="0">
                                                         </div>
                                                     </div>
                                                     <div class="text-start mt-5">
@@ -777,13 +776,13 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <label class="col-form-label mt-4" style="color: black;">Date</label>
-                                                            <input type="date" class="form-control border-secondary" id="partydate" name="partydate" style="color: black; background-color: white;">
+                                                            <input type="date" class="form-control border-secondary" id="partydate" name="partydate" style="color: black; background-color: white;" value="{{tod}}">
                                                         </div>
                                                     </div>
 
                                                     <div class="text-start mt-5">
-                                                        <button id="creditnxt" class="btn btn-primary bg-gradient" type="button">NEXT</button>
-                                                        <button id="creditprev" class="btn btn-primary bg-gradient  me-3" type="button">PREVIOUS</button>
+                                                        <button id="creditnxt" class="btn btn-primary bg-gradient me-3" type="button">NEXT</button>
+                                                        <button id="creditprev" class="btn btn-primary bg-gradient" type="button">PREVIOUS</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1092,8 +1091,8 @@
 
 <script>
     $(document).ready(function() {
-        address = '{{ pord.party.address }}'
-        contact = '{{ pord.party.contact }}'
+        address = '{{pbill.party.address}}'
+        contact = '{{pbill.party.contact}}'
         if (contact == ''){
             if(address == ''){
                 document.getElementById('daddressdiv').style.display = 'none';
@@ -1112,11 +1111,11 @@
                 document.getElementById('dbname').value = address;
             }
         }else{
-            if(data.address == ''){
+            if(address == ''){
                 document.getElementById('daddressdiv').style.display = 'none';
                 document.getElementById('addressdiv').style.display = 'none';
                 document.getElementById('phonediv').style.display = 'block';
-                document.getElementById('cust_phno').value = data.phno;
+                document.getElementById('cust_phno').value = contact;
                 document.getElementById('ddbilldiv').style.display = 'block';
                 document.getElementById('dbilldiv').style.display = 'none';
                 document.getElementById('billdiv').style.display = 'none';
@@ -1124,8 +1123,8 @@
                 document.getElementById('daddressdiv').style.display = 'none';
                 document.getElementById('addressdiv').style.display = 'block';
                 document.getElementById('phonediv').style.display = 'block';
-                document.getElementById('bname').value = data.address;
-                document.getElementById('cust_phno').value = data.phno;
+                document.getElementById('bname').value = address;
+                document.getElementById('cust_phno').value = contact;
                 document.getElementById('ddbilldiv').style.display = 'none';
                 document.getElementById('dbilldiv').style.display = 'none';
                 document.getElementById('billdiv').style.display = 'block';
@@ -1239,6 +1238,7 @@
     }
     
     $(document).on("click","#itemsave",function(){
+        var item_name = document.getElementById('item_name').value;
         if ($('#inclusive').prop('checked')) {
             tax= $('#inclusive').val();
         } 
@@ -1246,34 +1246,39 @@
             tax = $('#check').val();
         }
 
-        $.ajax({
-            type : 'POST',
-            url:"{% url 'saveitem' %}",
-            data:{
-                name : $("#item_name").val(),
-                unit : $("#unit").val(),
-                hsn : $("#hsn").val(),
-                taxref : tax,
-                sell_price : $("#saleprice").val(),
-                cost_price : $("#purprice").val(),
-                intra_st : $("#intra_st").val(),
-                inter_st : $("#inter_st").val(),
-                itmdate : $("#itmdate").val(),
-                stock : $("#stock").val(),
-                itmprice : $("#itmprice").val(),
-                minstock : $("#minstock").val(),
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-            },
-        
-            success: function(response) {
-                document.getElementById("modalItem").reset();
-                $('#newitem').modal('hide');
-                reloadItem();
-            },
-        });        
+        if (item_name === ''){
+            alert('Please provide an Item Name');
+        }else{
+            $.ajax({
+                type : 'POST',
+                url:"{% url 'saveitem' %}",
+                data:{
+                    name : $("#item_name").val(),
+                    unit : $("#unit").val(),
+                    hsn : $("#hsn").val(),
+                    taxref : tax,
+                    sell_price : $("#saleprice").val(),
+                    cost_price : $("#purprice").val(),
+                    intra_st : $("#intra_st").val(),
+                    inter_st : $("#inter_st").val(),
+                    itmdate : $("#itmdate").val(),
+                    stock : $("#stock").val(),
+                    itmprice : $("#itmprice").val(),
+                    minstock : $("#minstock").val(),
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+            
+                success: function(response) {
+                    document.getElementById("modalItem").reset();
+                    $('#newitem').modal('hide');
+                    reloadItem();
+                },
+            });  
+        }      
     });
     
     function reloadItem() {
+        var item_name = document.getElementById('item_name').value;
         $.ajax({
             url: "{% url 'item_dropdown' %}",
             type: "GET",
@@ -1282,14 +1287,23 @@
             csrfmiddlewaretoken: '{{ csrf_token }}',
 
             success: function(data) {
-                var dropdown = $('.product');
-                dropdown.empty();
-                dropdown.append(`<option selected hidden>Select</option>`);
-                $.each(data, function(key, value) {
-                    dropdown.append($('<option></option>').attr('value', key).text(value).val(key));
-                });
+                var table = document.getElementById('tab_logic');
+                var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                for (var i = 1; i <= rows.length; i++) {
+                    itmdropdown = document.getElementById('product'+i)
+                    var selectedIndex = itmdropdown.selectedIndex;
+                    var selectedOption = itmdropdown.options[selectedIndex];
+                    var selectedValue = selectedOption.value;
+                    var selectedText = selectedOption.text;
+                    
+                    var dropdown = $(`#product${i}`);
+                    dropdown.empty();
+                    dropdown.append(`<option ${selectedValue} selected hidden>${selectedText}</option>`);
+                    $.each(data, function(key, value) {
+                        dropdown.append($('<option></option>').attr('value', key).text(value).val(key));
+                    });
+                }
             },
-
             error: function(xhr, status, error) {
                 console.error(xhr.responseText);
             }
@@ -1647,6 +1661,7 @@
 </script>
 
 <script>
+    var checkbox1 = document.getElementById('inclusive');
     checkbox1.addEventListener('click', function () {
         if (checkbox1.checked) {
             document.getElementById('taxdiv').style.display = 'block';

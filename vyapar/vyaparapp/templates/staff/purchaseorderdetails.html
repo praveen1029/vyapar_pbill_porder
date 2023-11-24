@@ -225,9 +225,10 @@
                                                 <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis">
                                                     <section>
                                                         <div class="text-center">
-                                                            <h2 class="text-info">PURCHASE ORDER</h2>
+                                                            <h2 class="text-white bg-info p-3">PURCHASE ORDER</h2>
                                                         </div>
                                                     </section>
+                                                    <br>
                                                     <section class="top-content ">
                                                         <div class="top-left">
                                                             <div class="position-relative" style="text-align: left;">
@@ -237,10 +238,6 @@
                                                             </div>
                                                         </div>
                                                     </section>
-
-                                                    <hr style="color: black;">
-                                                    <br>
-
                                                     <section class="store-user mt-2">
                                                         <div class="col-12">
                                                             <div class="row  pb-3">
@@ -263,8 +260,6 @@
                                                             </div>
                                                         </div>
                                                     </section>
-
-                                                    <hr style="color: black;">
 
                                                     <section class="product-area mt-4">
                                                         <table class=" table table-hover table-bordered border-dark" id="table1">
@@ -347,7 +342,7 @@
                                                                         <tr>
                                                                             <th style="color: #000;">Grand Total &nbsp;&nbsp;&nbsp;&nbsp;</th>
                                                                             <th style="color: #000; ">:</th>
-                                                                            <th style="color: #000; text-align: center;">{{pord.grandtotal}}</th>
+                                                                            <th style="color: #000; text-align: right;">{{pord.grandtotal}}</th>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -486,7 +481,7 @@
                                                                         <tr >
                                                                             <th style="color: #000;">Grand Total &nbsp;&nbsp;&nbsp;&nbsp;</th>
                                                                             <th style="color: #000; ">:</th>
-                                                                            <th style="color: #000; text-align: center;">{{pord.grandtotal}}</th>
+                                                                            <th style="color: #000; text-align: right;">{{pord.grandtotal}}</th>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -564,10 +559,10 @@
                                                             <tbody>
                                                                 {% for itm in oitm %}
                                                                     <tr>
-                                                                        <td class="text-center" style="color: black;">{{ itm.product}}</td>
-                                                                        <td class="text-center" style="color: black;">{{ itm.hsn }}</td>
+                                                                        <td class="text-center" style="color: black;">{{ itm.product.item_name}}</td>
+                                                                        <td class="text-center" style="color: black;">{{ itm.product.item_hsn }}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.qty }}</td>
-                                                                        <td class="text-center" style="color: black;">{{ itm.price  }}</td>
+                                                                        <td class="text-center" style="color: black;">{{ itm.product.item_price  }}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.tax  }}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.discount  }}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.total }}</td>
@@ -629,7 +624,7 @@
                                                                     <tr >
                                                                         <th style="color: #000;">Grand Total &nbsp;&nbsp;&nbsp;&nbsp;</th>
                                                                         <th style="color: #000; ">:</th>
-                                                                        <th style="color: #000; text-align: center;">{{pord.grandtotal}}</th>
+                                                                        <th style="color: #000; text-align: right;">{{pord.grandtotal}}</th>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -812,9 +807,9 @@
                                                 </div>
 
                                                 <div class="ml-2 mt-2">
-                                                    <p>Created by : {{pord.staff.first_name}}  {{pord.staff.last_name}} <br>
-                                                    Printed by {{staff.first_name}}  {{staff.last_name}} <br>
-                                                    On <span id="datetimedisplay"></span>
+                                                    <p>
+                                                        Created by : {{pord.staff.first_name}}  {{pord.staff.last_name}} <br>
+                                                        Printed by {{staff.first_name}}  {{staff.last_name}} On <span id="datetimedisplay"></span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -840,8 +835,19 @@
 <script>
     function updateDateTime() {
         var currentDate = new Date();
-        var dateTimeString = currentDate.toLocaleString();
-        document.getElementById('datetimedisplay').textContent = dateTimeString;
+        var day = currentDate.getDate();
+        var month = currentDate.getMonth() + 1;
+        var year = currentDate.getFullYear();
+        var hours = currentDate.getHours();
+        var minutes = currentDate.getMinutes();
+        var seconds = currentDate.getSeconds();
+        var formattedDay = (day < 10) ? `0${day}` : day;
+        var formattedMonth = (month < 10) ? `0${month}` : month;
+        var formattedHours = (hours < 10) ? `0${hours}` : hours;
+        var formattedMinutes = (minutes < 10) ? `0${minutes}` : minutes;
+        var formattedSeconds = (seconds < 10) ? `0${seconds}` : seconds;
+        var formattedDateTime = `${formattedDay}/${formattedMonth}/${year} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+        document.getElementById('datetimedisplay').textContent = formattedDateTime;
     }
 
     updateDateTime();
@@ -906,7 +912,6 @@
         }
 
     function scrollToTop() {
-        // Scroll to the top of the page with smooth scrolling
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
@@ -942,7 +947,7 @@
             var opt =
             {
                 margin: 1,
-                filename: 'PurchaseOrder' + '.pdf',
+                filename: 'PurchaseOrder_No' + '{{pord.orderno}}' + '.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait', }
