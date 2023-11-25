@@ -1183,6 +1183,7 @@ def view_purchasebill(request):
   cmp = company.objects.get(id=staff.company.id)
   allmodules= modules_list.objects.get(company=cmp,status='New')
   pbill = PurchaseBill.objects.filter(company=cmp)
+
   if not pbill:
     context = {'staff':staff, 'allmodules':allmodules}
     return render(request,'staff/purchasebillempty.html',context)
@@ -1207,7 +1208,6 @@ def add_purchasebill(request):
     bill_no = last_bill.tot_bill_no + 1 
   else:
     bill_no = 1
-
   item = ItemModel.objects.filter(company=cmp,user=cmp.user)
   item_units = UnitModel.objects.filter(user=cmp.user,company=staff.company)
 
@@ -1372,7 +1372,7 @@ def history_purchasebill(request,id):
   pbill = PurchaseBill.objects.get(id=id,company=cmp)
   hst= PurchaseBillTransactionHistory.objects.filter(purchasebill=pbill,company=cmp)
 
-  context = {'staff':staff,'allmodules':allmodules,'hst':hst,'id':id}
+  context = {'staff':staff,'allmodules':allmodules,'hst':hst,'pbill':pbill}
   return render(request,'staff/purchasebillhistory.html',context)
 
 
@@ -1432,51 +1432,51 @@ def import_purchase_bill(request):
         prdsheet = [ep.cell(row=row_number2, column=col_num).value for col_num in range(1, ep.max_column + 1)]
         if prdsheet[0] == row_number1:
           itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=prdsheet[2])
+          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[5])
+          PurchaseBillItem.objects.create(purchasebill=pbill,
+                                company=cmp,
+                                product=itm,
+                                qty=prdsheet[3],
+                                tax=prdsheet[4],
+                                discount=prdsheet[5],
+                                total=total)
+
           temp = prdsheet[4].split('[')
           if billsheet[3] =='State':
             tax=int(temp[0][3:])
           else:
             tax=int(temp[0][4:])
 
-          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[5])
           subtotal += total
           tamount = total *(tax / 100)
-          taxamount += tamount 
-          PurchaseBillItem.objects.create(purchasebill=pbill,
-                                          company=cmp,
-                                          product=itm,
-                                          qty=prdsheet[3],
-                                          tax=prdsheet[4],
-                                          discount=prdsheet[5],
-                                          total=total)
+          taxamount += tamount
                 
-          if billsheet[3]=='State':
-            gst = round((taxamount/2),2)
-            pbill.sgst=gst
-            pbill.cgst=gst
-            pbill.igst=0
+      if billsheet[3]=='State':
+        gst = round((taxamount/2),2)
+        pbill.sgst=gst
+        pbill.cgst=gst
+        pbill.igst=0
 
-          else:
-            gst=round(taxamount,2)
-            pbill.igst=gst
-            pbill.cgst=0
-            pbill.sgst=0
+      else:
+        gst=round(taxamount,2)
+        pbill.igst=gst
+        pbill.cgst=0
+        pbill.sgst=0
 
-          gtotal = subtotal + taxamount + float(billsheet[6])
-          balance = gtotal- float(billsheet[7])
-          gtotal = round(gtotal,2)
-          balance = round(balance,2)
+      gtotal = subtotal + taxamount + float(billsheet[6])
+      balance = gtotal- float(billsheet[7])
+      gtotal = round(gtotal,2)
+      balance = round(balance,2)
 
-          pbill.subtotal=round(subtotal,2)
-          pbill.taxamount=round(taxamount,2)
-          pbill.adjust=round(billsheet[6],2)
-          pbill.grandtotal=gtotal
-          pbill.advance=round(billsheet[7],2)
-          pbill.balance=balance
-          pbill.save()
+      pbill.subtotal=round(subtotal,2)
+      pbill.taxamount=round(taxamount,2)
+      pbill.adjust=round(billsheet[6],2)
+      pbill.grandtotal=gtotal
+      pbill.advance=round(billsheet[7],2)
+      pbill.balance=balance
+      pbill.save()
 
-        PurchaseBillTransactionHistory.objects.create(purchasebill=pbill,staff=pbill.staff,company=pbill.company,action='Created')
-
+      PurchaseBillTransactionHistory.objects.create(purchasebill=pbill,staff=pbill.staff,company=pbill.company,action='Created')
       return JsonResponse({'message': 'File uploaded successfully!'})
   else:
     return JsonResponse({'message': 'File upload Failed!'})
@@ -1501,14 +1501,12 @@ def view_purchaseorder(request):
   allmodules= modules_list.objects.get(company=cmp,status='New')
   pord = PurchaseOrder.objects.filter(company=cmp)
 
-  if pord:
-    context = {'staff':staff, 'allmodules':allmodules,'pord':pord}
-    return render(request,'staff/purchaseorderlist.html',context)
-
-  context = {'staff':staff, 'allmodules':allmodules}
-  return render(request,'staff/purchaseorderempty.html',context)
-
-
+  if not pord:
+    context = {'staff':staff, 'allmodules':allmodules}
+    return render(request,'staff/purchaseorderempty.html',context)
+  
+  context = {'staff':staff, 'allmodules':allmodules,'pord':pord}
+  return render(request,'staff/purchaseorderlist.html',context)
 
 
 def add_purchaseorder(request):
@@ -1864,33 +1862,32 @@ def import_purchase_order(request):
                                           discount=prdsheet[5],
                                           total=total)
                 
-          if billsheet[4]=='State':
-            gst = round((taxamount/2),2)
-            pord.sgst=gst
-            pord.cgst=gst
-            pord.igst=0
+      if billsheet[4]=='State':
+        gst = round((taxamount/2),2)
+        pord.sgst=gst
+        pord.cgst=gst
+        pord.igst=0
 
-          else:
-            gst=round(taxamount,2)
-            pord.igst=gst
-            pord.cgst=0
-            pord.sgst=0
+      else:
+        gst=round(taxamount,2)
+        pord.igst=gst
+        pord.cgst=0
+        pord.sgst=0
 
-          gtotal = subtotal + taxamount + float(billsheet[7])
-          balance = gtotal- float(billsheet[8])
-          gtotal = round(gtotal,2)
-          balance = round(balance,2)
+      gtotal = subtotal + taxamount + float(billsheet[7])
+      balance = gtotal- float(billsheet[8])
+      gtotal = round(gtotal,2)
+      balance = round(balance,2)
 
-          pord.subtotal=round(subtotal,2)
-          pord.taxamount=round(taxamount,2)
-          pord.adjust=round(billsheet[7],2)
-          pord.grandtotal=gtotal
-          pord.advance=round(billsheet[8],2)
-          pord.balance=balance
-          pord.save()
+      pord.subtotal=round(subtotal,2)
+      pord.taxamount=round(taxamount,2)
+      pord.adjust=round(billsheet[7],2)
+      pord.grandtotal=gtotal
+      pord.advance=round(billsheet[8],2)
+      pord.balance=balance
+      pord.save()
 
       PurchaseBillTransactionHistory.objects.create(purchaseorder=pord,staff=pord.staff,company=pord.company,action='Created')
-
       return JsonResponse({'message': 'File uploaded successfully!'})
   else:
     return JsonResponse({'message': 'File upload Failed!'})
@@ -1904,7 +1901,7 @@ def history_purchaseorder(request,id):
   pord = PurchaseOrder.objects.get(id=id,company=cmp)
   hst= PurchaseOrderTransactionHistory.objects.filter(purchaseorder=pord,company=cmp)
 
-  context = {'staff':staff,'allmodules':allmodules,'hst':hst,'id':id}
+  context = {'staff':staff,'allmodules':allmodules,'hst':hst,'pord':pord}
   return render(request,'staff/purchaseorderhistory.html',context)
 
 
@@ -2024,3 +2021,12 @@ def itemdetails(request):
   price = itm.item_purchase_price
   qty = itm.item_current_stock
   return JsonResponse({'hsn':hsn, 'gst':gst, 'igst':igst, 'price':price, 'qty':qty})
+
+def getPartyList(request):
+    options = [
+        {"value": "option1", "text": "Option 1"},
+        {"value": "option2", "text": "Option 2"},
+        # Add more options as needed
+    ]
+    return JsonResponse({"options": options})
+

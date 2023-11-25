@@ -345,7 +345,7 @@
                                                 <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">{{p.balance}}</td>
                                                 <td class="clickable-row " style="color: black;" data-href="details_purchaseorder/{{ p.id }}">Purchase Order</td>
                                                 {% if p.convert == 0 %}
-                                                <td class="clickable-row" style="color: #E4A11B;" data-href="details_purchaseorder/{{ p.id }}">Order Overdue</td>
+                                                <td class="clickable-row" style="color: #1e00ff;" data-href="details_purchaseorder/{{ p.id }}">Order Overdue</td>
                                                 <td class="clickable-row" style="color: black;" data-href="details_purchaseorder/{{ p.id }}">
                                                     <a href="{% url 'convert_to_bill' p.id %}" class="btn btn-outline-secondary text-dark">Convert to Bill</a>
                                                 </td>
@@ -459,7 +459,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Corresponding Row no from PurchaseBillModel </td>
+                                            <td>Corresponding Row no from PurchaseOrderModel </td>
                                             <td></td>
                                             <td></td>
                                             <td></td>

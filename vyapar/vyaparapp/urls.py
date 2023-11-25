@@ -136,6 +136,7 @@ urlpatterns = [
     path('orderhistory',views.orderhistory,name='orderhistory'), 
     path('convert_to_bill/<int:id>',views.convert_to_bill,name='convert_to_bill'),
     path('order_to_bill/<int:id>',views.order_to_bill,name='order_to_bill'),
+    path('getPartyList',views.getPartyList,name='getPartyList'),
     path('import_purchase_order',views.import_purchase_order,name='import_purchase_order'),  
     path('history_purchaseorder/<int:id>',views.history_purchaseorder,name='history_purchaseorder'),  
     path('bankdata',views.bankdata,name='bankdata'),  

@@ -67,7 +67,7 @@
                 </div>
                 <p></p>
 
-                <form action="{% url 'bill_to_order' pord.id %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchasebill()">
+                <form action="{% url 'order_to_bill' pord.id %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchasebill()">
                     {% csrf_token %}
                     <div class="page-content">
                         <div class="card radius-15">
@@ -159,6 +159,9 @@
                                                 <option value="Other State">Other State</option>
                                             </select>
                                         </div>
+                                    </div>
+                                    
+                                    <div class="row">
                                         <div class="col-md-4">
                                             {% if pord.pay_method != 'Cash' and pord.pay_method != 'Cheque' and pord.pay_method != 'UPI' %}
                                             <label class="col-form-label">Payment Method</label>
@@ -184,9 +187,6 @@
                                                 </select>
                                             {% endif %}
                                         </div>
-                                    </div>
-                                    
-                                    <div class="row">
                                         {% if pord.cheque_no %}
                                             <div class="col-md-4" id="chequediv">
                                                 <label class="col-form-label" >Cheque ID</label>
