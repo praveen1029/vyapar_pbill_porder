@@ -11,6 +11,9 @@
   <!-- Font Awesome CSS CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
   <!-- Font Awesome CSS -->
   <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -65,26 +68,8 @@
 
           <ul id="sidebarnav ">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <li class="sidebar-item mt-3">
-              <a class="sidebar-link " href="{% url 'staffhome' %}" aria-expanded="false"
+              <a class="sidebar-link " href="{% url 'homepage' %}" aria-expanded="false"
                 style="text-decoration: none; color: black; background-color: rgb(210, 235, 241,0.5);">
                 <b style="margin-left: 10px;"><i class="ti ti-layout-dashboard"></i></b>
                 </span>
@@ -131,9 +116,10 @@
                   <hr>
                   {% endif %}
                   {% if allmodules.Estimate != Null %}
-                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                  <a href="javascript:void(0)" class="d-flex align-items-center justify-content-between gap-2 dropdown-item">
                     <!-- <i class="ti ti-mail fs-6"></i> -->
-                    <p class="mb-0 fs-3">Estimate/ Quotation</p>
+                    <p class="mb-0 fs-3" onclick="window.location.href=`{% url 'estimate_quotation' %}`">Estimate / Quotation</p>
+                    <i class="ti ti-plus fs-5 fw-bold" onclick="window.location.href=`{% url 'create_estimate' %}`"></i>
                   </a>
                   <hr>
                   {% endif %}
@@ -152,9 +138,10 @@
                   <hr>
                   {% endif %}
                   {% if allmodules.Delivery_challan != Null %}
-                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                  <a href="javascript:void(0)" class="d-flex align-items-center justify-content-between gap-2 dropdown-item">
                     <!-- <i class="ti ti-mail fs-6"></i> -->
-                    <p class="mb-0 fs-3">Delivery Challan</p>
+                    <p class="mb-0 fs-3" onclick="window.location.href=`{% url 'delivery_challan' %}`">Delivery Challan</p>
+                    <i class="ti ti-plus fs-5 fw-bold" onclick="window.location.href=`{% url 'createDeliveryChallan' %}`"></i>
                   </a>
                   <hr>
                   {% endif %}
@@ -183,21 +170,6 @@
                 
                 <i class="fa fa-caret-down" style="margin-left: 42%;"></i>
               </button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              
               <div class="dropdown-container" style="background-color: aliceblue;padding: 20px;justify-content: center;">
                 {% if allmodules.Purchase_bills != Null %}
                   <a href="{% url 'view_purchasebill' %}" class="d-flex align-items-center gap-2 dropdown-item">
@@ -262,7 +234,12 @@
               </button>
               <div class="dropdown-container" style="background-color: aliceblue;padding: 20px;justify-content: center;">
                 {% if allmodules.Bank_account != Null %}
-                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                <div class="position-relative">
+                  <div class="position-absolute end-0 bottom-0" style="z-index: 1;margin-bottom: -1.6em;margin-right: 0rem;">
+                    <a style="color: black;" href="{% url 'bank_create' %}"><span class="fs-5 fa fa-plus-circle"></span></a>
+                  </div>
+                </div>
+                  <a href="{% url 'banks_list' 0 %}" class="d-flex align-items-center gap-2 dropdown-item">
                     <!-- <i class="ti ti-mail fs-6"></i> -->
                     <p class="mb-0 fs-3">Bank Accounts</p>
                   </a>
@@ -383,6 +360,7 @@
   <script src="{% static 'assets/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
   <script src="{% static 'assets/libs/simplebar/dist/simplebar.js' %}"></script>
   <script src="{% static 'assets/js/dashboard.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
 
   <script>
     /* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */

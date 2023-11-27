@@ -243,9 +243,8 @@
                                                             <div class="row  pb-3">
                                                                 <div class="col-7">
                                                                     <p><b>FROM</b>,</p>
-                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pbill.staff.first_name }} {{pbill.staff.last_name }}</h5>
+                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pbill.company.company_name }}</h5>
                                                                     <p class="address" style="margin-top: -1vh; margin-left: 4vh;"> 
-                                                                        {{pbill.company.company_name }}<br>
                                                                         {{pbill.company.address}}<br>
                                                                         {{pbill.company.city}},
                                                                         {{pbill.company.state}}<br>
@@ -376,9 +375,8 @@
                                                             <div class="row  pb-2 mt-3">
                                                                 <div class="col-4 pl-0">
                                                                     <label class="text-white w-100 p-1 mb-1" style="background-color: #615dff; border-top-right-radius: 4vh; border-bottom-right-radius: 4vh;" ><b>BILLING ADDRESS</b></label>
-                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pbill.staff.first_name}} {{pbill.staff.last_name}}</h5>
+                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pbill.company.company_name}}</h5>
                                                                     <p class="address" style="font-weight: bold;color: #000;">
-                                                                        {{pbill.company.company_name}} <br>
                                                                         {{pbill.company.address}}
                                                                         <br>
                                                                         {{pbill.company.city}}
@@ -501,7 +499,6 @@
                                                         <br>
                                                         <p style="font-size: 4vh; text-align: center;">PURCHASE BILL</p>
                                                         <p style=" text-align: center;"> 
-                                                            {{pbill.staff.first_name}} {{pbill.staff.last_name}}<br>
                                                             {{pbill.company.company_name}} <br>
                                                             {{pbill.company.address}} <br>
                                                             {{pbill.company.city}},

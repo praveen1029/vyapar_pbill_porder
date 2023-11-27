@@ -5,8 +5,6 @@
 <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <style>
     .card-body{
@@ -40,6 +38,26 @@
     #toReceiveRadio {
         accent-color: green;
     }
+
+    #modal_closing{
+        height:5vh;
+    }
+        
+    #customer{
+        background-color: white;
+        color: black;
+    }
+
+    .selectize-input {
+        height: 5vh;
+        border-color: #54B4D3;
+        border-radius: 5px;
+    }
+
+    .option:hover {
+        background-color: #3B71CA;
+        color: white;
+    }  
     
     ::-webkit-scrollbar {
         display: none
@@ -67,7 +85,7 @@
                 </div>
                 <p></p>
 
-                <form action="{% url 'update_purchasebill' pbill.id %}" method="post" class="needs-validation" enctype="multipart/form-data" onsubmit="return validatepurchasebill()">
+                <form action="{% url 'update_purchasebill' pbill.id %}" method="post" enctype="multipart/form-data" onsubmit="return validatepurchasebill()" novalidate>
                     {% csrf_token %}
                     <div class="page-content">
                         <div class="card radius-15">
@@ -243,7 +261,7 @@
 
                                                         <td style="width:21%" >
                                                             <div class="d-flex">
-                                                                <select name='product[]' id="product{{ forloop.counter }}" class="form-control product border-secondary" onchange="changeprd(this.id)" style="color: black; background-color: white;">
+                                                                <select name='product[]' id="product{{ forloop.counter }}" class="form-control product border-secondary" onchange="changeprd(this.id,this.value)" style="color: black; background-color: white;">
                                                                     <option value="{{ j.product.id }}" selected hidden>{{ j.product.item_name }}</option>
                                                                     <option value=""  hidden>Select Product</option>
                                                                     {% for i in item %}
@@ -258,7 +276,7 @@
                                                             </div>
                                                         </td>
 
-                                                        <td style="width:11%">
+                                                        <td style="width:12%">
                                                             <input type="text" name='hsn[]'  value="{{ j.product.item_hsn }}" id="hsn{{ forloop.counter }}" class="form-control border-secondary" style="color: black; background-color: white;"/>
                                                         </td>
 
@@ -942,7 +960,7 @@
         var cheque_id = document.getElementById('cheque_id').value;
         var upi_id = document.getElementById('upi_id').value;
 
-        if (customer === 'NIL') {
+        if (customer === '') {
             alert('Please select a customer');
             return false;
         } else if(plosu === ''){
@@ -974,7 +992,7 @@
                 alert('Select a product on row '+ i);
                 return false;
             }
-            if(qty === '0'){
+            if(qty === '' || qty =='0'){
                 alert('Add quantity in row '+ i);
                 return false;
             }
@@ -984,8 +1002,36 @@
 </script>
 
 <script>
-    $(document).ready(function() {
-        $('#customer').select2();
+    $(document).ready(function () {
+        cust_name = '{{cust_name}}'
+        $('#customer').selectize({
+            sortField: 'value',
+            render: {
+                item: function (item, escape) {
+                    if (item.value === '') {
+                        return '';
+                    }
+                    return '<div>' + escape(item.text) + '</div>';
+                }
+            }
+
+        });
+    });
+
+    $(document).ready(function () {
+        $('.product').selectize({
+            sortField: 'value',
+            items: [''],
+            render: {
+                item: function (item, escape) {
+                    if (item.value === '') {
+                        return '';
+                    }
+                    return '<div>' + escape(item.text) + '</div>';
+                }
+            }
+
+        });
     });
 </script>
 
@@ -1059,14 +1105,56 @@
 </script>
 
 <script>
-    function changeprd(id){
-        id_val = id.slice(7)
-        document.getElementById(`qty${id_val}`).value = 0
-        document.getElementById(`tax1${id_val}`).value =  ' '
-        document.getElementById(`tax2${id_val}`).value = ' '
-        document.getElementById(`disc${id_val}`).value = 0
-        document.getElementById(`total${id_val}`).value = 0
-        document.getElementById(`taxamount${id_val}`).value = 0
+    function changeprd(id,value){
+        var n = id.slice(7);
+        $.ajax({
+            url: "{% url 'itemdetails' %}",
+            type : 'GET',
+            data:{
+                id : value,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+            
+            success: function(response) {
+                data = response.hsn
+                data2 = response.qty
+                data3 = response.price
+                data4 = response.gst
+                data5 = response.igst
+
+                document.getElementById('hsn'+n).value = data;
+                document.getElementById('unit'+n).value = data3;
+                document.getElementById('intrataxval'+n).value = data4;
+                document.getElementById('intertaxval'+n).value = data5;
+                document.getElementById('select_tax'+n).style.display = 'none';
+                var bc = document.getElementById("plosu").value;
+                if (bc == 'State' ) {
+                    var taxes = document.getElementsByClassName('seltax');
+                    $(`#tax2${n}`).removeClass('d-flex');
+                    $(`#tax2${n}`).addClass('d-none');
+                    $(`#tax1${n}`).removeClass('d-none');
+                    $(`#tax1${n}`).addClass('d-flex');
+                    if (data4 != ' '){
+                        document.getElementById('tax1'+n).value = data4;
+                    }else{
+                        document.getElementById('tax1'+n).value = ' ';
+                    }
+                            
+                } else {
+                    var taxes = document.getElementsByClassName('seltax');
+                    $(`#tax1${n}`).removeClass('d-flex');
+                    $(`#tax1${n}`).addClass('d-none');
+                    $(`#tax2${n}`).removeClass('d-none');
+                    $(`#tax2${n}`).addClass('d-flex');
+                    if(data5 != ' '){
+                        document.getElementById('tax2'+n).value = data5;
+                    }else{
+                        document.getElementById('tax2'+n).value = ' ';
+                    }
+                }
+            },
+        });
+
         calc()
     }
 </script>
@@ -1222,17 +1310,12 @@
             success: function(response) {
                 id_list = response.id_list
                 party_list = response.party_list
-                var dropdown = $('#customer');
-                dropdown.empty();
-                dropdown.append(`<option value=' ' selected hidden>Select</option>`);
-
-                let select = document.getElementById("customer");
+                var $select = $(document.getElementById('customer'));
+                var selectize = $select[0].selectize;
                 for(let i=0; i<id_list.length;i++){
-                    let newOption = document.createElement("option");
-                    newOption.text = party_list[i];
-                    newOption.value = id_list[i];
-                    select.appendChild(newOption);
+                    selectize.addOption({value:id_list[i],text:party_list[i]});
                 }
+                selectize.setValue("");
             },
         });
     }
@@ -1278,36 +1361,32 @@
     });
     
     function reloadItem() {
-        var item_name = document.getElementById('item_name').value;
-        $.ajax({
-            url: "{% url 'item_dropdown' %}",
-            type: "GET",
-            dataType: "json",
-            data: $(this).serialize(),
-            csrfmiddlewaretoken: '{{ csrf_token }}',
+        function reloadItem() {
+            $.ajax({
+                url: "{% url 'item_dropdown' %}",
+                type: "GET",
+                dataType: "json",
+                data: $(this).serialize(),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
 
-            success: function(data) {
-                var table = document.getElementById('tab_logic');
-                var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-                for (var i = 1; i <= rows.length; i++) {
-                    itmdropdown = document.getElementById('product'+i)
-                    var selectedIndex = itmdropdown.selectedIndex;
-                    var selectedOption = itmdropdown.options[selectedIndex];
-                    var selectedValue = selectedOption.value;
-                    var selectedText = selectedOption.text;
-                    
-                    var dropdown = $(`#product${i}`);
-                    dropdown.empty();
-                    dropdown.append(`<option ${selectedValue} selected hidden>${selectedText}</option>`);
-                    $.each(data, function(key, value) {
-                        dropdown.append($('<option></option>').attr('value', key).text(value).val(key));
-                    });
+                success: function(data) {
+                    id_list = data.id_list
+                    product_list = data.product_list
+                    var table = document.getElementById('tab_logic');
+                    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                    for (var i = 1; i <= rows.length; i++) {
+                        var $select = $(document.getElementById('product'+i));
+                        var selectize = $select[0].selectize;
+                        for(let i=0; i<id_list.length;i++){
+                            selectize.addOption({value:id_list[i],text:product_list[i]});
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr.responseText);
-            }
-        });
+            });
+        }
     }
     
     $(document).ready(function () {
@@ -1383,7 +1462,7 @@
 
                     <td style="width:21%">
                         <div class="d-flex">
-                            <select name='product[]' id="product${roinc}" class="form-control border-secondary product"  onchange="changeprd(this.id)" style="color: black; background-color: white;">
+                            <select name='product[]' id="product${roinc}" class="form-control border-secondary product"  onchange="changeprd(this.id,this.value)" style="color: black; background-color: white;">
                                 <option value="" selected hidden>Select Product</option>
                                 {% for i in item %}
                                     {% if i.cid_id == cmp.cid %}
@@ -1398,7 +1477,7 @@
                         </div>
                     </td>
 
-                    <td tyle="width:11%">
+                    <td tyle="width:12%">
                         <input type="text" name='hsn[]' id="hsn${roinc}" class="form-control border-secondary" style="color: black; background-color: white;" readonly />
                     </td>
 
@@ -1451,56 +1530,6 @@
                     </td>
                 </tr>`
             );
-        });
-    });
-    
-    $(document).on('change', '.product',function(){ 
-        var n = $(this).attr("id").slice(7);
-        $.ajax({
-            url: "{% url 'itemdetails' %}",
-            type : 'GET',
-            data:{
-                id : $(this).val(),
-                csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-            success: function(response) {
-                data = response.hsn
-                data2 = response.qty
-                data3 = response.price
-                data4 = response.gst
-                data5 = response.igst
-
-                document.getElementById('hsn'+n).value = data;
-                document.getElementById('unit'+n).value = data3;
-                document.getElementById('intrataxval'+n).value = data4;
-                document.getElementById('intertaxval'+n).value = data5;
-                document.getElementById('select_tax'+n).style.display = 'none';
-                var bc = document.getElementById("plosu").value;
-                if (bc == 'State' ) {
-                    var taxes = document.getElementsByClassName('seltax');
-                    $(`#tax2${n}`).removeClass('d-flex');
-                    $(`#tax2${n}`).addClass('d-none');
-                    $(`#tax1${n}`).removeClass('d-none');
-                    $(`#tax1${n}`).addClass('d-flex');
-                    if (data4 != ' '){
-                        document.getElementById('tax1'+n).value = data4;
-                    }else{
-                        document.getElementById('tax1'+n).value = ' ';
-                    }
-                            
-                } else {
-                    var taxes = document.getElementsByClassName('seltax');
-                    $(`#tax1${n}`).removeClass('d-flex');
-                    $(`#tax1${n}`).addClass('d-none');
-                    $(`#tax2${n}`).removeClass('d-none');
-                    $(`#tax2${n}`).addClass('d-flex');
-                    if(data5 != ' '){
-                        document.getElementById('tax2'+n).value = data5;
-                    }else{
-                        document.getElementById('tax2'+n).value = ' ';
-                    }
-                }
-            },
         });
     });
     

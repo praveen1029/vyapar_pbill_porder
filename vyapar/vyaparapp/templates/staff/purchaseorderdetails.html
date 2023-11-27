@@ -243,9 +243,8 @@
                                                             <div class="row  pb-3">
                                                                 <div class="col-7">
                                                                     <p><b>FROM</b>,</p>
-                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pord.staff.first_name }} {{pord.staff.last_name }}</h5>
+                                                                    <h5 class="text-info" style='margin-left: 4vh;'>{{pord.company.company_name }}</h5>
                                                                     <p class="address" style="margin-top: -1vh; margin-left: 4vh;"> 
-                                                                        {{pord.company.company_name }}<br>
                                                                         {{pord.company.address}}<br>
                                                                         {{pord.company.city}},
                                                                         {{pord.company.state}}<br>
@@ -377,9 +376,8 @@
                                                             <div class="row  pb-2 mt-3">
                                                                 <div class="col-4 pl-0">
                                                                     <label class="text-white w-100 p-1 mb-1" style="background-color: #615dff; border-top-right-radius: 4vh; border-bottom-right-radius: 4vh;" ><b>BILLING ADDRESS</b></label>
-                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pord.staff.first_name}} {{pord.staff.last_name}}</h5>
+                                                                    <h5 class="text-secondary" style="font-weight: bold;">{{pord.company.company_name}}</h5>
                                                                     <p class="address" style="font-weight: bold;color: #000;">
-                                                                        {{pord.company.company_name}} <br>
                                                                         {{pord.company.address}}
                                                                         <br>
                                                                         {{pord.company.city}}
@@ -502,7 +500,6 @@
                                                         <br>
                                                         <p style="font-size: 4vh; text-align: center;">PURCHASE ORDER</p>
                                                         <p style=" text-align: center;"> 
-                                                            {{pord.staff.first_name}} {{pord.staff.last_name}}<br>
                                                             {{pord.company.company_name}} <br>
                                                             {{pord.company.address}} <br>
                                                             {{pord.company.city}},

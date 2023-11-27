@@ -138,7 +138,6 @@ class TransactionModel(models.Model):
     trans_status = models.CharField(max_length=255)
     trans_created_date = models.DateTimeField(auto_now_add=True,null=True)
 
-# ========================= ASHIKH V U (END)===========================
 
 class BankModel(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
@@ -154,7 +153,35 @@ class BankModel(models.Model):
     current_balance = models.BigIntegerField(null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     created_by = models.CharField(max_length=255,null=True)
+    
+    
+class BankTransactionModel(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
+    company = models.ForeignKey(company,on_delete=models.CASCADE,blank=True,null=True)
+    from_here = models.ForeignKey(BankModel,related_name='from_this_bank',on_delete=models.CASCADE,null=True,blank=True)
+    to_here = models.ForeignKey(BankModel,related_name='to_this_bank',on_delete=models.CASCADE,null=True,blank=True)
+    type = models.CharField(max_length=255,null=True)
+    name = models.CharField(max_length=255,null=True)
+    date = models.DateField(null=True)
+    amount = models.BigIntegerField(default=0)
+    created_date = models.DateTimeField(auto_now_add=True)
+    transfer_type=models.CharField(max_length=255,null=True)
+    current_amount = models.BigIntegerField(default=0)
+    last_action = models.CharField(max_length=255,null=True)
+    by = models.CharField(max_length=255,null=True) 
+    
+    
+class BankTransactionHistory(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    company = models.ForeignKey(company,on_delete=models.CASCADE,blank=True,null=True)
+    bank = models.ForeignKey(BankModel,on_delete=models.CASCADE,blank=True,null=True)
+    bank_trans = models.ForeignKey(BankTransactionModel,on_delete=models.CASCADE,blank=True,null=True)
+    date = models.DateField(auto_now_add=True,null=True)
+    action = models.CharField(max_length=255)
+    done_by = models.ForeignKey(staff_details,related_name='done_by_staff',on_delete=models.CASCADE,blank=True,null=True)
+    done_by_name = models.CharField(max_length=255)
 
+# ========================= ASHIKH V U (END)===========================
 
 class PurchaseBill(models.Model):
     billno = models.IntegerField(default=0,null=True,blank=True)
@@ -186,7 +213,8 @@ class PurchaseBillItem(models.Model):
     total = models.IntegerField(default=0, null=True)
     tax = models.CharField(max_length=100)
     discount = models.CharField(max_length=100,default=0, null=True)
-
+    
+    
 class PurchaseBillTransactionHistory(models.Model):
     purchasebill = models.ForeignKey(PurchaseBill,on_delete=models.CASCADE)
     staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
@@ -197,15 +225,127 @@ class PurchaseBillTransactionHistory(models.Model):
     ]
     action = models.CharField(max_length=20, choices=CHOICES)
     transactiondate = models.DateField(auto_now=True)
+    
+    
+# ==============delivery challan & Estimate ============shemeem --start=======
+
+class Estimate(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    ref_no = models.CharField(max_length=20, null=True)
+    date = models.DateField(null=True, blank=True)
+    party_name = models.CharField(max_length=150)
+    contact = models.CharField(max_length=255,null=True,blank=True)
+    billing_address = models.TextField()
+    state_of_supply = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField()
+    subtotal = models.FloatField(null=True, blank=True)
+    igst = models.FloatField(null=True,blank=True)
+    cgst = models.FloatField(null=True,blank=True)
+    sgst = models.FloatField(null=True,blank=True)
+    tax_amount =  models.FloatField(null=True,blank=True)
+    adjustment = models.FloatField(null=True, blank=True)
+    total_amount = models.FloatField(null=True, blank=True)
+    balance = models.FloatField(null=True, blank=True)
+    status = models.CharField(max_length=50, null=True)
+    is_converted = models.BooleanField(null=True, default=False)
+
+class DeletedEstimate(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    ref_no = models.CharField(max_length=50)
+
+
+class Estimate_items(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    eid = models.ForeignKey(Estimate, on_delete=models.CASCADE)
+    item = models.ForeignKey(ItemModel, on_delete=models.CASCADE,null=True, blank=True)
+    name = models.CharField(max_length=200)
+    hsn = models.CharField(max_length=15)
+    quantity = models.PositiveIntegerField()
+    price = models.FloatField(null=True, blank=True)
+    tax = models.CharField(max_length=10)
+    discount = models.FloatField(null=True,blank=True)
+    total = models.FloatField()
+
+class EstimateTransactionHistory(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    company = models.ForeignKey(company,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
+    estimate = models.ForeignKey(Estimate,on_delete=models.CASCADE,blank=True,null=True)
+    date = models.DateField(auto_now_add=True,auto_now=False,null=True)
+    action = models.CharField(max_length=255)
+    
+
+
+class DeliveryChallan(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    challan_no = models.CharField(max_length=20, null=True)
+    date = models.DateField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True)
+    party_name = models.CharField(max_length=150)
+    contact = models.CharField(max_length=255,null=True,blank=True)
+    billing_address = models.TextField()
+    state_of_supply = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField()
+    subtotal = models.FloatField(null=True, blank=True)
+    igst = models.FloatField(null=True,blank=True)
+    cgst = models.FloatField(null=True,blank=True)
+    sgst = models.FloatField(null=True,blank=True)
+    tax_amount =  models.FloatField(null=True,blank=True)
+    adjustment = models.FloatField(null=True, blank=True)
+    total_amount = models.FloatField(null=True, blank=True)
+    balance = models.FloatField(null=True, blank=True)
+    status = models.CharField(max_length=50, null=True)
+    is_converted = models.BooleanField(null=True, default=False)
+
+class DeletedDeliveryChallan(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    challan_no = models.CharField(max_length=50)
+
+
+class DeliveryChallanItems(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    cid = models.ForeignKey(DeliveryChallan, on_delete=models.CASCADE)
+    item = models.ForeignKey(ItemModel, on_delete=models.CASCADE,null=True, blank=True)
+    name = models.CharField(max_length=200)
+    hsn = models.CharField(max_length=15)
+    quantity = models.PositiveIntegerField()
+    price = models.FloatField(null=True, blank=True)
+    tax = models.CharField(max_length=10)
+    discount = models.FloatField(null=True, blank=True)
+    total = models.FloatField()
+
+
+class DeliveryChallanTransactionHistory(models.Model):
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,blank=True,null=True)
+    company = models.ForeignKey(company,on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
+    challan = models.ForeignKey(DeliveryChallan,on_delete=models.CASCADE,blank=True,null=True)
+    date = models.DateField(auto_now_add=True,auto_now=False,null=True)
+    action = models.CharField(max_length=255)
+
+    
+# ==================================shemeem --end =======================================
 
 
 class PurchaseOrder(models.Model):
     orderno = models.IntegerField(default=0,null=True,blank=True)
-    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
-    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
-    party = models.ForeignKey(party, on_delete=models.CASCADE)
-    orderdate = models.DateField()
-    duedate = models.DateField()
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True,default='')
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True,default='')
+    party = models.ForeignKey(party, on_delete=models.CASCADE,default='')
+    orderdate = models.DateField(default='')
+    duedate = models.DateField(default='')
     supplyplace = models.CharField(max_length=100, default='')
     pay_method = models.CharField(max_length=255, default='', null=True)
     cheque_no = models.CharField(max_length=255, default='', null=True)
@@ -222,7 +362,8 @@ class PurchaseOrder(models.Model):
     tot_ord_no = models.IntegerField(default=0, null=True)
     convert = models.IntegerField(default=0)
     convert_id = models.ForeignKey(PurchaseBill,on_delete=models.CASCADE, null=True,blank=True)
-
+    
+    
 class PurchaseOrderItem(models.Model):
     purchaseorder = models.ForeignKey(PurchaseOrder,on_delete=models.CASCADE)
     company = models.ForeignKey(company,on_delete=models.CASCADE)
@@ -231,7 +372,7 @@ class PurchaseOrderItem(models.Model):
     total = models.IntegerField(default=0, null=True)
     tax = models.CharField(max_length=100)
     discount = models.CharField(max_length=100,default=0, null=True)
-
+    
 class PurchaseOrderTransactionHistory(models.Model):
     purchaseorder = models.ForeignKey(PurchaseOrder,on_delete=models.CASCADE)
     staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
@@ -242,3 +383,55 @@ class PurchaseOrderTransactionHistory(models.Model):
     ]
     action = models.CharField(max_length=20, choices=CHOICES)
     transactiondate = models.DateField(auto_now=True)
+    
+    
+    
+# ========================= HARIPRIYA B NAIR (START)===========================
+class purchasedebit(models.Model):
+    pdebitid = models.AutoField(('pdid'), primary_key=True)
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    party = models.ForeignKey(party, on_delete=models.CASCADE,null=True,blank=True)
+    reference_number=models.TextField(max_length=100,null=True,blank=True)
+    debitdate = models.DateField(null=True)
+    billno = models.CharField(max_length=150,null=True)
+    billdate = models.CharField(max_length=100,null=True)
+    supply = models.CharField(max_length=150,null=True)
+    subtotal = models.CharField(max_length=100,null=True)
+    sgst = models.CharField(max_length=100,null=True)
+    cgst = models.CharField(max_length=100,null=True)
+    igst = models.CharField(max_length=100,null=True)
+    taxamount = models.CharField(max_length=100,null=True)
+    grandtotal = models.CharField(max_length=100,null=True)
+    adjustment = models.FloatField(default=0,null=True,blank=True)
+    paid_amount = models.FloatField(blank=True,null=True)
+    balance_amount = models.FloatField(blank=True,null=True)
+    payment_type = models.CharField(max_length=100,null=True)
+    cheque_no = models.CharField(max_length=255, default='', null=True)
+    upi_no = models.CharField(max_length=255, default='', null=True)
+    tot_debt_no = models.IntegerField(default=0, null=True)
+  
+
+
+class purchasedebit1(models.Model):
+    pdebit = models.ForeignKey(purchasedebit, on_delete=models.CASCADE,null=True)
+    company = models.ForeignKey(company,on_delete=models.CASCADE,null=True)
+    product = models.ForeignKey(ItemModel,on_delete=models.CASCADE,null=True)
+    qty = models.IntegerField(default=0, null=True)
+    total = models.IntegerField(default=0, null=True)
+    tax = models.CharField(max_length=100,null=True)
+    discount = models.IntegerField(default=0, null=True)
+
+
+class DebitnoteTransactionHistory(models.Model):
+    debitnote = models.ForeignKey(purchasedebit,on_delete=models.CASCADE)
+    staff = models.ForeignKey(staff_details,on_delete=models.CASCADE,null=True,blank=True)
+    company = models.ForeignKey(company,on_delete= models.CASCADE,null=True,blank=True)
+    CHOICES = [
+        ('Created', 'Created'),
+        ('Updated', 'Updated'),
+    ]
+    action = models.CharField(max_length=20, choices=CHOICES)
+    transactiondate = models.DateField(auto_now=True)
+
+# ========================= HARIPRIYA B NAIR (END)===========================
