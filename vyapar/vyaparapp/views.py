@@ -2488,19 +2488,15 @@ def create_purchasebill(request):
     product = tuple(request.POST.getlist("product[]"))
     qty =  tuple(request.POST.getlist("qty[]"))
     discount =  tuple(request.POST.getlist("discount[]"))
-    if request.POST.get('placosupply') =='State':
-      tax =  tuple(request.POST.getlist("tax1[]"))
-    else:
-      tax =  tuple(request.POST.getlist("tax2[]"))
     total =  tuple(request.POST.getlist("total[]"))
     billno = PurchaseBill.objects.get(billno =pbill.billno,company=cmp)
 
-    if len(product)==len(qty)==len(tax)==len(discount)==len(total):
-        mapped=zip(product,qty,tax,discount,total)
+    if len(product)==len(qty)==len(discount)==len(total):
+        mapped=zip(product,qty,discount,total)
         mapped=list(mapped)
         for ele in mapped:
           itm = ItemModel.objects.get(id=ele[0])
-          PurchaseBillItem.objects.create(product = itm,qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchasebill=billno,company=cmp)
+          PurchaseBillItem.objects.create(product = itm,qty=ele[1],discount=ele[2],total=ele[3],purchasebill=billno,company=cmp)
 
     PurchaseBill.objects.filter(company=cmp).update(tot_bill_no=F('tot_bill_no') + 1)
     
@@ -2572,20 +2568,16 @@ def update_purchasebill(request,id):
 
     product = tuple(request.POST.getlist("product[]"))
     qty = tuple(request.POST.getlist("qty[]"))
-    if request.POST.get('placosupply') == 'State':
-      tax =tuple( request.POST.getlist("tax1[]"))
-    else:
-      tax = tuple(request.POST.getlist("tax2[]"))
     total = tuple(request.POST.getlist("total[]"))
     discount = tuple(request.POST.getlist("discount[]"))
 
     PurchaseBillItem.objects.filter(purchasebill=pbill,company=cmp).delete()
-    if len(total)==len(discount)==len(qty)==len(tax):
-      mapped=zip(product,qty,tax,discount,total)
+    if len(total)==len(discount)==len(qty):
+      mapped=zip(product,qty,discount,total)
       mapped=list(mapped)
       for ele in mapped:
         itm = ItemModel.objects.get(id=ele[0])
-        PurchaseBillItem.objects.create(product =itm,qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchasebill=pbill,company=cmp)
+        PurchaseBillItem.objects.create(product =itm,qty=ele[1],discount=ele[2],total=ele[3],purchasebill=pbill,company=cmp)
 
     PurchaseBillTransactionHistory.objects.create(purchasebill=pbill,company=cmp,staff=staff,action='Updated')
     return redirect('view_purchasebill')
@@ -2607,6 +2599,7 @@ def details_purchasebill(request,id):
 
   context={'staff':staff,'allmodules':allmodules,'pbill':pbill,'pitm':pitm,'itm_len':itm_len,'dis':dis}
   return render(request,'staff/purchasebilldetails.html',context)
+
 
 def history_purchasebill(request,id):
   sid = request.session.get('staff_id')
@@ -2674,21 +2667,23 @@ def import_purchase_bill(request):
       for row_number2 in range(2, ep.max_row + 1):
         prdsheet = [ep.cell(row=row_number2, column=col_num).value for col_num in range(1, ep.max_column + 1)]
         if prdsheet[0] == row_number1:
-          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=prdsheet[2])
-          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[5])
+          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=int(prdsheet[2],company=cmp))
+          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[4])
           PurchaseBillItem.objects.create(purchasebill=pbill,
                                 company=cmp,
                                 product=itm,
                                 qty=prdsheet[3],
-                                tax=prdsheet[4],
-                                discount=prdsheet[5],
+                                discount=prdsheet[4],
                                 total=total)
 
-          temp = prdsheet[4].split('[')
           if billsheet[3] =='State':
-            tax=int(temp[0][3:])
+            taxval = itm.item_gst
+            taxval=taxval.split('[')
+            tax=int(taxval[0][3:])
           else:
-            tax=int(temp[0][4:])
+            taxval = itm.item_igst
+            taxval=taxval.split('[')
+            tax=int(taxval[0][4:])
 
           subtotal += total
           tamount = total *(tax / 100)
@@ -5029,19 +5024,15 @@ def create_purchaseorder(request):
     product = tuple(request.POST.getlist("product[]"))
     qty =  tuple(request.POST.getlist("qty[]"))
     discount =  tuple(request.POST.getlist("discount[]"))
-    if request.POST.get('placosupply') =='State':
-      tax =  tuple(request.POST.getlist("tax1[]"))
-    else:
-      tax =  tuple(request.POST.getlist("tax2[]"))
     total =  tuple(request.POST.getlist("total[]"))
     ordno = PurchaseOrder.objects.get(orderno=pord.orderno,company=cmp)
 
-    if len(product)==len(qty)==len(tax)==len(discount)==len(total):
-        mapped=zip(product,qty,tax,discount,total)
+    if len(product)==len(qty)==len(discount)==len(total):
+        mapped=zip(product,qty,discount,total)
         mapped=list(mapped)
         for ele in mapped:
           itm = ItemModel.objects.get(id=ele[0])
-          PurchaseOrderItem.objects.create(product=itm,qty=ele[1],tax=ele[2],discount=ele[3],total=ele[4],purchaseorder=ordno,company=cmp)
+          PurchaseOrderItem.objects.create(product=itm,qty=ele[1],discount=ele[2],total=ele[3],purchaseorder=ordno,company=cmp)
 
     PurchaseOrder.objects.filter(company=cmp).update(tot_ord_no=F('tot_ord_no') + 1)
 
@@ -5057,7 +5048,7 @@ def create_purchaseorder(request):
       return redirect('view_purchaseorder')
     
   else:
-    return render(request,'staff/purchasebilladd.html')
+    return render(request,'staff/purchaseorderadd.html')
 
 
 def edit_purchaseorder(request,id):
@@ -5115,20 +5106,16 @@ def update_purchaseorder(request,id):
 
     product = tuple(request.POST.getlist("product[]"))
     qty = tuple(request.POST.getlist("qty[]"))
-    if request.POST.get('placosupply') == 'State':
-      tax =tuple( request.POST.getlist("tax1[]"))
-    else:
-      tax = tuple(request.POST.getlist("tax2[]"))
     total = tuple(request.POST.getlist("total[]"))
     discount = tuple(request.POST.getlist("discount[]"))
 
     PurchaseOrderItem.objects.filter(purchaseorder=pord,company=cmp).delete()
-    if len(total)==len(discount)==len(qty)==len(tax):
-      mapped=zip(product,qty,tax,discount,total)
+    if len(total)==len(discount)==len(qty):
+      mapped=zip(product,qty,discount,total)
       mapped=list(mapped)
       for ele in mapped:
         itm = ItemModel.objects.get(id=ele[0])
-        PurchaseOrderItem.objects.create(product=itm,qty=ele[1],tax=ele[2],discount=ele[3],total=ele[4],purchaseorder=pord,company=cmp)
+        PurchaseOrderItem.objects.create(product=itm,qty=ele[1],discount=ele[2],total=ele[3],purchaseorder=pord,company=cmp)
 
     PurchaseOrderTransactionHistory.objects.create(purchaseorder=pord,staff=staff,company=cmp,action='Updated')
     return redirect('view_purchaseorder')
@@ -5214,33 +5201,33 @@ def import_purchase_order(request):
     cmp = company.objects.get(id=staff.company.id)
     totval = int(PurchaseOrder.objects.filter(company=cmp).last().tot_ord_no) + 1
 
-    excel_bill = request.FILES['ordfile']
-    excel_b = load_workbook(excel_bill)
-    eb = excel_b['Sheet1']
+    excel_order = request.FILES['ordfile']
+    excel_o = load_workbook(excel_order)
+    eo = excel_o['Sheet1']
     excel_prd = request.FILES['prdfile']
     excel_p = load_workbook(excel_prd)
     ep = excel_p['Sheet1']
 
-    for row_number1 in range(2, eb.max_row + 1):
-      billsheet = [eb.cell(row=row_number1, column=col_num).value for col_num in range(1, eb.max_column + 1)]
-      part = party.objects.get(party_name=billsheet[0],email=billsheet[1],company=cmp)
+    for row_number1 in range(2, eo.max_row + 1):
+      ordersheet = [eo.cell(row=row_number1, column=col_num).value for col_num in range(1, eo.max_column + 1)]
+      part = party.objects.get(party_name=ordersheet[0],email=ordersheet[1],company=cmp)
       PurchaseOrder.objects.create(party=part,orderno=totval,
-                                  orderdate=billsheet[2],
-                                  duedate=billsheet[3],
-                                  supplyplace =billsheet[4],
+                                  orderdate=ordersheet[2],
+                                  duedate=ordersheet[3],
+                                  supplyplace =ordersheet[4],
                                   tot_ord_no = totval,
                                   company=cmp,staff=staff)
       
       pord = PurchaseOrder.objects.last()
-      if billsheet[5] == 'Cheque':
+      if ordersheet[5] == 'Cheque':
         pord.pay_method = 'Cheque'
-        pord.cheque_no = billsheet[5]
-      elif billsheet[5] == 'UPI':
+        pord.cheque_no = ordersheet[5]
+      elif ordersheet[5] == 'UPI':
         pord.pay_method = 'UPI'
-        pord.upi_no = billsheet[5]
+        pord.upi_no = ordersheet[5]
       else:
-        if billsheet[5] != 'Cash':
-          bank = BankModel.objects.get(bank_name=billsheet[5],company=cmp)
+        if ordersheet[5] != 'Cash':
+          bank = BankModel.objects.get(bank_name=ordersheet[5],company=cmp)
           pord.pay_method = bank
         else:
           pord.pay_method = 'Cash'
@@ -5253,14 +5240,17 @@ def import_purchase_order(request):
       for row_number2 in range(2, ep.max_row + 1):
         prdsheet = [ep.cell(row=row_number2, column=col_num).value for col_num in range(1, ep.max_column + 1)]
         if prdsheet[0] == row_number1:
-          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=prdsheet[2])
-          temp = prdsheet[4].split('[')
-          if billsheet[3] =='State':
-            tax=int(temp[0][3:])
+          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=prdsheet[2],company=cmp)
+          if ordersheet[3] =='State':
+            taxval =itm.item_gst
+            taxval=taxval.split('[')
+            tax=int(taxval[0][3:])
           else:
-            tax=int(temp[0][4:])
+            taxval =itm.item_igst
+            taxval=taxval.split('[')
+            tax=int(taxval[0][4:])
 
-          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[5])
+          total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[4])
           subtotal += total
           tamount = total *(tax / 100)
           taxamount += tamount 
@@ -5268,36 +5258,34 @@ def import_purchase_order(request):
                                           company=cmp,
                                           product=itm,
                                           qty=prdsheet[3],
-                                          tax=prdsheet[4],
-                                          discount=prdsheet[5],
+                                          discount=prdsheet[4],
                                           total=total)
-                
-      if billsheet[4]=='State':
-        gst = round((taxamount/2),2)
-        pord.sgst=gst
-        pord.cgst=gst
-        pord.igst=0
+          if ordersheet[4]=='State':
+            gst = round((taxamount/2),2)
+            pord.sgst=gst
+            pord.cgst=gst
+            pord.igst=0
 
-      else:
-        gst=round(taxamount,2)
-        pord.igst=gst
-        pord.cgst=0
-        pord.sgst=0
+          else:
+            gst=round(taxamount,2)
+            pord.igst=gst
+            pord.cgst=0
+            pord.sgst=0
 
-      gtotal = subtotal + taxamount + float(billsheet[7])
-      balance = gtotal- float(billsheet[8])
+      gtotal = subtotal + taxamount + float(ordersheet[7])
+      balance = gtotal- float(ordersheet[8])
       gtotal = round(gtotal,2)
       balance = round(balance,2)
 
       pord.subtotal=round(subtotal,2)
       pord.taxamount=round(taxamount,2)
-      pord.adjust=round(billsheet[7],2)
+      pord.adjust=round(ordersheet[7],2)
       pord.grandtotal=gtotal
-      pord.advance=round(billsheet[8],2)
+      pord.advance=round(ordersheet[8],2)
       pord.balance=balance
       pord.save()
 
-      PurchaseBillTransactionHistory.objects.create(purchaseorder=pord,staff=pord.staff,company=pord.company,action='Created')
+      PurchaseOrderTransactionHistory.objects.create(purchaseorder=pord,staff=pord.staff,company=pord.company,action='Created')
       return JsonResponse({'message': 'File uploaded successfully!'})
   else:
     return JsonResponse({'message': 'File upload Failed!'})
@@ -5345,19 +5333,16 @@ def order_to_bill(request,id):
     product = tuple(request.POST.getlist("product[]"))
     qty =  tuple(request.POST.getlist("qty[]"))
     discount =  tuple(request.POST.getlist("discount[]"))
-    if request.POST.get('placosupply') =='State':
-      tax =  tuple(request.POST.getlist("tax1[]"))
-    else:
-      tax =  tuple(request.POST.getlist("tax2[]"))
     total =  tuple(request.POST.getlist("total[]"))
     billno = PurchaseBill.objects.get(billno=pbill.billno,company=cmp)
 
-    if len(product)==len(qty)==len(tax)==len(discount)==len(total):
-        mapped=zip(product,qty,tax,discount,total)
+    if len(product)==len(qty)==len(discount)==len(total):
+        mapped=zip(product,qty,discount,total)
         mapped=list(mapped)
+        print(mapped)
         for ele in mapped:
           itm = ItemModel.objects.get(id=ele[0])
-          PurchaseBillItem.objects.create(product=itm,qty=ele[1], tax=ele[2],discount=ele[3],total=ele[4],purchasebill=billno,company=cmp)
+          PurchaseBillItem.objects.create(product=itm,qty=ele[1],discount=ele[2],total=ele[3],purchasebill=billno,company=cmp)
 
     PurchaseBill.objects.filter(company=cmp).update(tot_bill_no=F('tot_bill_no') + 1)
     pbill.tot_bill_no = pbill.billno

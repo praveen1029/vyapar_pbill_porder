@@ -262,8 +262,7 @@
                                                         <td style="width:21%" >
                                                             <div class="d-flex">
                                                                 <select name='product[]' id="product{{ forloop.counter }}" class="form-control product border-secondary" onchange="changeprd(this.id,this.value)" style="color: black; background-color: white;">
-                                                                    <option value="{{ j.product.id }}" selected hidden>{{ j.product.item_name }}</option>
-                                                                    <option value=""  hidden>Select Product</option>
+                                                                    <option value="{{ j.product.id }}" selected hidden>{{j.product.item_name}}</option>
                                                                     {% for i in item %}
                                                                         {% if i.cid_id == cmp.cid %}
                                                                             <option value="{{ i.id }}" >{{ i.item_name  }} </option>
@@ -291,47 +290,10 @@
                                                         <td style="width: 15%;">
                                                             <input type="text" id="intrataxval{{ forloop.counter }}" value="{{j.product.item_gst}}" hidden>
                                                             <input type="text" id="intertaxval{{ forloop.counter }}" value="{{j.product.item_igst}}" hidden>
-                                                            <input type="text"  id="select_tax{{ forloop.counter }}" placeholder="Tax Rate" class="form-control seltax d-none">
                                                             {% if pbill.supplyplace  == 'State'  %}
-                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-flex border-secondary" style="color: black; background-color: white;">
-                                                                    <option selected value="{{j.tax}}" hidden>{{j.tax}}</option>
-                                                                    <option  value=" " hidden>Select Tax</option>
-                                                                    <option value="GST0[0%]" >GST0[0%]</option>
-                                                                    <option value="GST3[3%]">GST3[3%]</option>
-                                                                    <option value="GST5[5%]">GST5[5%]</option>
-                                                                    <option value="GST12[12%]">GST12[12%]</option>
-                                                                    <option value="GST13[18%]">GST18[18%]</option>
-                                                                    <option value="GST28[28%]">GST28[28%]</option>
-                                                                </select>
-                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-none border-secondary" style="color: black; background-color: white;">
-                                                                    <option  value=" " hidden>Select Tax</option>
-                                                                    <option value="IGST0[0%]"  >IGST0[0%]</option>
-                                                                    <option value="IGST3[3%]">IGST3[3%]</option>
-                                                                    <option value="IGST5[5%]">IGST5[5%]</option>
-                                                                    <option value="IGST12[12%]">IGST12[12%]</option>
-                                                                    <option value="IGST18[18%]">IGST18[18%]</option>
-                                                                    <option value="IGST28[28%]">IGST28[28%]</option>
-                                                                </select>
+                                                                <input type="text" name='tax[]' id="tax1" class="form-control border-secondary tax" style="color: black; background-color: white;" value="{{j.product.item_gst}}"  readonly />
                                                             {% else %}
-                                                                <select name='tax1[]' id="tax1{{ forloop.counter }}" class="form-control tax intra_tax d-none border-secondary" style="color: black; background-color: white;">
-                                                                    <option  value=" " hidden>Select Tax</option>
-                                                                    <option value="GST0[0%]" >GST0[0%]</option>
-                                                                    <option value="GST3[3%]">GST3[3%]</option>
-                                                                    <option value="GST5[5%]">GST5[5%]</option>
-                                                                    <option value="GST12[12%]">GST12[12%]</option>
-                                                                    <option value="GST13[18%]">GST18[18%]</option>
-                                                                    <option value="GST28[28%]">GST28[28%]</option>
-                                                                </select>
-                                                                <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-flex border-secondary" style="color: black; background-color: white;">
-                                                                    <option value="{{j.tax}}" selected hidden>{{j.tax}}</option>
-                                                                    <option  value=" " hidden>Select Tax</option>
-                                                                    <option value="IGST0[0%]" >IGST0[0%]</option>
-                                                                    <option value="IGST3[3%]">IGST3[3%]</option>
-                                                                    <option value="IGST5[5%]">IGST5[5%]</option>
-                                                                    <option value="IGST12[12%]">IGST12[12%]</option>
-                                                                    <option value="IGST18[18%]">IGST18[18%]</option>
-                                                                    <option value="IGST28[28%]">IGST28[28%]</option>
-                                                                </select>
+                                                                <input type="text" name='tax[]' id="tax1" class="form-control border-secondary tax" style="color: black; background-color: white;" value="{{j.product.item_igst}}"  readonly />
                                                             {% endif %}
                                                         </td>
 
@@ -1021,7 +983,6 @@
     $(document).ready(function () {
         $('.product').selectize({
             sortField: 'value',
-            items: [''],
             render: {
                 item: function (item, escape) {
                     if (item.value === '') {
@@ -1113,7 +1074,7 @@
             data:{
                 id : value,
                 csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
+            },
             
             success: function(response) {
                 data = response.hsn
@@ -1121,41 +1082,29 @@
                 data3 = response.price
                 data4 = response.gst
                 data5 = response.igst
-
-                document.getElementById('hsn'+n).value = data;
-                document.getElementById('unit'+n).value = data3;
-                document.getElementById('intrataxval'+n).value = data4;
-                document.getElementById('intertaxval'+n).value = data5;
-                document.getElementById('select_tax'+n).style.display = 'none';
                 var bc = document.getElementById("plosu").value;
-                if (bc == 'State' ) {
-                    var taxes = document.getElementsByClassName('seltax');
-                    $(`#tax2${n}`).removeClass('d-flex');
-                    $(`#tax2${n}`).addClass('d-none');
-                    $(`#tax1${n}`).removeClass('d-none');
-                    $(`#tax1${n}`).addClass('d-flex');
-                    if (data4 != ' '){
-                        document.getElementById('tax1'+n).value = data4;
-                    }else{
-                        document.getElementById('tax1'+n).value = ' ';
-                    }
-                            
-                } else {
-                    var taxes = document.getElementsByClassName('seltax');
-                    $(`#tax1${n}`).removeClass('d-flex');
-                    $(`#tax1${n}`).addClass('d-none');
-                    $(`#tax2${n}`).removeClass('d-none');
-                    $(`#tax2${n}`).addClass('d-flex');
-                    if(data5 != ' '){
-                        document.getElementById('tax2'+n).value = data5;
-                    }else{
-                        document.getElementById('tax2'+n).value = ' ';
-                    }
+                if (bc == 'State') {
+                    document.getElementById('intrataxval'+n).value = data4;
+                    document.getElementById('intertaxval'+n).value = data5;
+                    document.getElementById('hsn'+n).value = data;
+                    document.getElementById('unit'+n).value = data3;
+                    document.getElementById('tax'+n).value = data4;
+                    calc()
+                } else if (bc == 'Other State') {
+                    document.getElementById('intrataxval'+n).value = data4;
+                    document.getElementById('intertaxval'+n).value = data5;
+                    document.getElementById('hsn'+n).value = data;
+                    document.getElementById('unit'+n).value = data3;
+                    document.getElementById('tax'+n).value = data5;
+                    calc()
+                }else{
+                    alert('Please Select Place of Supply')
+                    var $select = $(document.getElementById('product'+n));
+                    var selectize = $select[0].selectize;
+                    selectize.setValue("");
                 }
             },
         });
-
-        calc()
     }
 </script>
 
@@ -1235,30 +1184,18 @@
             document.getElementById('cgstdiv').style.display = 'flex';
             document.getElementById('sgstdiv').style.display = 'flex';
             document.getElementById('igstdiv').style.display = 'none'; 
-            $(".inter_tax").removeClass('d-flex');
-            $(".inter_tax").addClass('d-none');
-            $(".intra_tax").removeClass('d-none');
-            $(".intra_tax").addClass('d-flex');
             for (var l = 1; l <= numberOfRows; l++){
                 val = document.getElementById('intrataxval'+l).value;
-                if(document.getElementById('tax2'+l).value != ' '){
-                    document.getElementById('tax1'+l).value = val
-                }
+                document.getElementById('tax1'+l).value = val
             }
 
         } else {
             document.getElementById('cgstdiv').style.display = 'none';
             document.getElementById('sgstdiv').style.display = 'none';
             document.getElementById('igstdiv').style.display = 'flex';
-            $(".intra_tax").removeClass('d-flex');
-            $(".intra_tax").addClass('d-none');
-            $(".inter_tax").removeClass('d-none');
-            $(".inter_tax").addClass('d-flex');
             for (var l = 1; l <= numberOfRows; l++){
                 val = document.getElementById('intertaxval'+l).value;
-                if(document.getElementById('tax1'+l).value != ' '){
-                    document.getElementById('tax2'+l).value = val
-                }
+                document.getElementById('tax2'+l).value = val
             }
         }
         calc()
@@ -1361,32 +1298,30 @@
     });
     
     function reloadItem() {
-        function reloadItem() {
-            $.ajax({
-                url: "{% url 'item_dropdown' %}",
-                type: "GET",
-                dataType: "json",
-                data: $(this).serialize(),
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+        $.ajax({
+            url: "{% url 'item_dropdown' %}",
+            type: "GET",
+            dataType: "json",
+            data: $(this).serialize(),
+            csrfmiddlewaretoken: '{{ csrf_token }}',
 
-                success: function(data) {
-                    id_list = data.id_list
-                    product_list = data.product_list
-                    var table = document.getElementById('tab_logic');
-                    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-                    for (var i = 1; i <= rows.length; i++) {
-                        var $select = $(document.getElementById('product'+i));
-                        var selectize = $select[0].selectize;
-                        for(let i=0; i<id_list.length;i++){
-                            selectize.addOption({value:id_list[i],text:product_list[i]});
-                        }
+            success: function(data) {
+                id_list = data.id_list
+                product_list = data.product_list
+                var table = document.getElementById('tab_logic');
+                var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                for (var i = 1; i <= rows.length; i++) {
+                    var $select = $(document.getElementById('product'+i));
+                    var selectize = $select[0].selectize;
+                    for(let i=0; i<id_list.length;i++){
+                        selectize.addOption({value:id_list[i],text:product_list[i]});
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
                 }
-            });
-        }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
     }
     
     $(document).ready(function () {
@@ -1492,25 +1427,7 @@
                     <td style='width:15%;'>
                         <input type="text" id="intrataxval${roinc}" hidden>
                         <input type="text" id="intertaxval${roinc}" hidden>
-                        <input type="text"  id="select_tax${roinc}" placeholder="Tax Rate" class="form-control border-secondary seltax" readonly style="color: black; background-color: white;">
-                        <select name='tax1[]' id="tax1${roinc}" class="form-control border-secondary tax intra_tax d-none" style="color: black; background-color: white;">
-                            <option  value=" " selected hidden>Select Tax</option>
-                            <option value="GST0[0%]" >GST0[0%]</option>
-                            <option value="GST3[3%]">GST3[3%]</option>
-                            <option value="GST5[5%]">GST5[5%]</option>
-                            <option value="GST12[12%]">GST12[12%]</option>
-                            <option value="GST13[18%]">GST18[18%]</option>
-                            <option value="GST28[28%]">GST28[28%]</option>
-                        </select>
-                        <select name='tax2[]' id="tax2${roinc}" class="form-control border-secondary tax inter_tax d-none" style="color: black; background-color: white;">
-                            <option  value=" " selected hidden>Select Tax</option>
-                            <option value="IGST0[0%]" >IGST0[0%]</option>
-                            <option value="IGST3[3%]">IGST3[3%]</option>
-                            <option value="IGST5[5%]">IGST5[5%]</option>
-                            <option value="IGST12[12%]">IGST12[12%]</option>
-                            <option value="IGST18[18%]">IGST18[18%]</option>
-                            <option value="IGST28[28%]">IGST28[28%]</option>
-                        </select>
+                        <input type="text" name='tax[]' id="tax${roinc}" class="form-control border-secondary tax" style="color: black; background-color: white;" placeholder="GST" readonly/>
                     </td>  
 
                     <td tyle="width:10%">
@@ -1554,17 +1471,13 @@
         clonedRow.find('[id]').each(function() {
             var oldId = $(this).attr('id');
             var newId = oldId.replace(/\d+/, roinc+1);
-            console.log(newId)
             $(this).attr('id', newId );
         });
         clonedRow.find('.product').each(function() {
             $(this).val(originalRow.find('.product').val());
         });
-        clonedRow.find('.intra_tax').each(function() {
-            $(this).val(originalRow.find('.intra_tax').val());
-        });
-        clonedRow.find('.inter_tax').each(function() {
-            $(this).val(originalRow.find('.inter_tax').val());
+        clonedRow.find('.tax').each(function() {
+            $(this).val(originalRow.find('.tax').val());
         });
         originalRow.after(clonedRow);
         var table = document.getElementById('tab_logic');
@@ -1595,11 +1508,11 @@
                 var dis = $(this).find('.disc').val();
                 var bc = $("#plosu").val();
                 if(bc=='State'){
-                    taxval = $(this).find('.intra_tax').val().slice(3);
+                    taxval = $(this).find('.tax').val().slice(3);
                     var tax = parseInt(taxval.match(/\d+/)[0], 10);
                 }
                 else{
-                    taxval = $(this).find('.inter_tax').val().slice(4);
+                    taxval = $(this).find('.tax').val().slice(4);
                     var tax = parseInt(taxval.match(/\d+/)[0], 10);
                 }
                 $(this).find('.total').val((parseFloat(qty) *parseFloat(price))-parseFloat(dis));

@@ -211,7 +211,6 @@ class PurchaseBillItem(models.Model):
     product = models.ForeignKey(ItemModel,on_delete=models.CASCADE)
     qty = models.IntegerField(default=0, null=True)
     total = models.IntegerField(default=0, null=True)
-    tax = models.CharField(max_length=100)
     discount = models.CharField(max_length=100,default=0, null=True)
     
     
@@ -370,7 +369,6 @@ class PurchaseOrderItem(models.Model):
     product = models.ForeignKey(ItemModel,on_delete=models.CASCADE)
     qty = models.IntegerField(default=0, null=True)
     total = models.IntegerField(default=0, null=True)
-    tax = models.CharField(max_length=100)
     discount = models.CharField(max_length=100,default=0, null=True)
     
 class PurchaseOrderTransactionHistory(models.Model):

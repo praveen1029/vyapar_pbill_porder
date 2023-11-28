@@ -454,7 +454,6 @@
                                             <th>Product Name</th>
                                             <th>Product HSN</th>
                                             <th>Quantity</th>
-                                            <th>Tax</th>
                                             <th>Discount</th>
                                         </tr>
                                     </thead>
@@ -464,7 +463,6 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td>GST_[_%]/IGST_[_%]</td>
                                             <td></td>
                                         </tr>
                                     </tbody>
@@ -508,6 +506,14 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('fromDate').addEventListener('change', updateMinDate);
+    function updateMinDate() {
+        var selectedDate = document.getElementById('fromDate').value;
+        document.getElementById('toDate').min = selectedDate;
+    }
+</script>
 
 <script>
     $(document).ready(function() {
