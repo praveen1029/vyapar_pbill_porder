@@ -266,8 +266,8 @@
                                                                 <tr>
                                                                     <td style="text-align: center; font-weight:bold; color:black ">Items</td>
                                                                     <td style="font-weight:bold; color:black ">HSN</td>
-                                                                    <td style="font-weight:bold; color:black ">Price</td>
                                                                     <td style="font-weight:bold; color:black">Quantity</td>
+                                                                    <td style="font-weight:bold; color:black ">Price</td>
                                                                     <td style="font-weight:bold; color:black">Tax</td>
                                                                     <td style="font-weight:bold; color:black">Discount</td>
                                                                     <td style="font-weight:bold; color:black">Total</td>
@@ -280,7 +280,11 @@
                                                                     <td style="color:black">{{i.product.item_hsn}}</td >
                                                                     <td style="color:black">{{i.qty}}</td>
                                                                     <td style="color:black">{{i.product.item_purchase_price}}</td>
-                                                                    <td style="color:black">{{i.tax}}</td>
+                                                                    {% if pbill.supplyplace == 'State' %}
+                                                                    <td class="text-center" style="color: black;">{{ i.product.item_gst  }}</td>
+                                                                    {% else %}
+                                                                    <td class="text-center" style="color: black;">{{ i.product.item_igst  }}</td>
+                                                                    {% endif %}
                                                                     <td style="color:black">{{i.discount}} </td>
                                                                     <td style="color:black">{{i.total}}</td>
                                                                 </tr>
@@ -414,7 +418,11 @@
                                                                         <td class="text-center" style="color:black">{{ itm.product.item_hsn }}</td>
                                                                         <td class="text-center" style="color:black">{{ itm.qty }}</td>
                                                                         <td class="text-center" style="color:black">{{ itm.product.item_purchase_price  }}</td>
-                                                                        <td class="text-center" style="color:black">{{ itm.tax  }}</td>
+                                                                        {% if pbill.supplyplace == 'State' %}
+                                                                        <td class="text-center" style="color: black;">{{ itm.product.item_gst  }}</td>
+                                                                        {% else %}
+                                                                        <td class="text-center" style="color: black;">{{ itm.product.item_igst  }}</td>
+                                                                        {% endif %}
                                                                         <td class="text-center" style="color:black">{{ itm.discount  }}</td>
                                                                         <td class="text-center" style="color:black">{{ itm.total }}</td>
                                                                     </tr>
@@ -555,7 +563,11 @@
                                                                         <td class="text-center" style="color: black;">{{ itm.product.item_hsn }}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.qty }}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.product.item_purchase_price  }}</td>
-                                                                        <td class="text-center" style="color: black;">{{ itm.tax  }}</td>
+                                                                        {% if pbill.supplyplace == 'State' %}
+                                                                        <td class="text-center" style="color: black;">{{ itm.product.item_gst  }}</td>
+                                                                        {% else %}
+                                                                        <td class="text-center" style="color: black;">{{ itm.product.item_igst  }}</td>
+                                                                        {% endif %}
                                                                         <td class="text-center" style="color: black;">{{ itm.discount  }}</td>
                                                                         <td class="text-center" style="color: black;">{{ itm.total }}</td>
                                                                     </tr>
@@ -710,9 +722,15 @@
                                                         <div class="equal-length-item" style="text-align: center; ">
                                                             {{i.product.item_purchase_price}}
                                                         </div>
+                                                        {% if pbill.supplyplace == 'State' %}
                                                         <div class="equal-length-item" id="tax{{ forloop.counter }}" style="display: none;">
-                                                            {{i.tax}}
+                                                            {{ i.product.item_gst  }}
                                                         </div>
+                                                        {% else %}
+                                                        <div class="equal-length-item" id="tax{{ forloop.counter }}" style="display: none;">
+                                                            {{ i.product.item_igst  }}
+                                                        </div>
+                                                        {% endif %}
                                                         <div class="equal-length-item" id="taxval{{ forloop.counter }}" style="text-align: center; ">
                                                         </div>
                                                         <div class="equal-length-item" style="text-align: center; ">

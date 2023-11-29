@@ -2667,7 +2667,7 @@ def import_purchase_bill(request):
       for row_number2 in range(2, ep.max_row + 1):
         prdsheet = [ep.cell(row=row_number2, column=col_num).value for col_num in range(1, ep.max_column + 1)]
         if prdsheet[0] == row_number1:
-          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=int(prdsheet[2],company=cmp))
+          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=int(prdsheet[2]),company=cmp)
           total=int(prdsheet[3])*int(itm.item_purchase_price) - int(prdsheet[4])
           PurchaseBillItem.objects.create(purchasebill=pbill,
                                 company=cmp,
@@ -5240,7 +5240,7 @@ def import_purchase_order(request):
       for row_number2 in range(2, ep.max_row + 1):
         prdsheet = [ep.cell(row=row_number2, column=col_num).value for col_num in range(1, ep.max_column + 1)]
         if prdsheet[0] == row_number1:
-          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=prdsheet[2],company=cmp)
+          itm = ItemModel.objects.get(item_name=prdsheet[1],item_hsn=int(prdsheet[2]),company=cmp)
           if ordersheet[3] =='State':
             taxval =itm.item_gst
             taxval=taxval.split('[')

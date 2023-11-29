@@ -530,7 +530,7 @@
                                                                 <option value="GST3[3%]">GST3[3%]</option>
                                                                 <option value="GST5[5%]">GST5[5%]</option>
                                                                 <option value="GST12[12%]">GST12[12%]</option>
-                                                                <option value="GST13[18%]">GST18[18%]</option>
+                                                                <option value="GST18[18%]">GST18[18%]</option>
                                                                 <option value="GST28[28%]">GST28[28%]</option>
                                                                 </select>
                                                             </div>
@@ -976,7 +976,6 @@
                     return '<div>' + escape(item.text) + '</div>';
                 }
             }
-
         });
     });
 
@@ -991,30 +990,22 @@
                     return '<div>' + escape(item.text) + '</div>';
                 }
             }
-
         });
     });
-</script>
 
-<script>
-    $(document).on('change','#invoicedate', function() {
-        var days = parseInt($('#termadd').val());
-        order_date =new Date( document.getElementById("invoicedate").value)
-        if (!isNaN(order_date.getTime())) {
-            const endDate = new Date(order_date);
-            endDate.setDate(endDate.getDate() + days);
-            const isoString = endDate.toISOString(); 
-            const day = isoString.slice(8, 10);
-            const month = isoString.slice(5, 7);
-            const year = isoString.slice(0, 4);
-
-            const formattedDate = `${day}-${month}-${year}`;
-
-            document.getElementById("duedat").value = formattedDate;
-        } else {
-                alert("Please enter a valid date.");
-        }
-    })
+    function productsearch(roinc){
+        $(`#product${roinc}`).selectize({
+            sortField: 'value',
+            render: {
+                item: function (item, escape) {
+                    if (item.value === '') {
+                        return '';
+                    }
+                    return '<div>' + escape(item.text) + '</div>';
+                }
+            }
+        });
+    }
 </script>
 
 <script>
@@ -1171,12 +1162,7 @@
 </script>
 
 <script>
-    
     $(document).on("change", "#plosu", function(){
-        var taxes = document.getElementsByClassName('seltax');
-        for (var i = 0; i < taxes.length; i++) {
-            taxes[i].style.display = 'none';
-        }
         var table = document.getElementById("items-table-body");
         var numberOfRows = table.rows.length;
         var bc = document.getElementById("plosu").value;
@@ -1186,7 +1172,7 @@
             document.getElementById('igstdiv').style.display = 'none'; 
             for (var l = 1; l <= numberOfRows; l++){
                 val = document.getElementById('intrataxval'+l).value;
-                document.getElementById('tax1'+l).value = val
+                document.getElementById('tax'+l).value = val
             }
 
         } else {
@@ -1195,7 +1181,7 @@
             document.getElementById('igstdiv').style.display = 'flex';
             for (var l = 1; l <= numberOfRows; l++){
                 val = document.getElementById('intertaxval'+l).value;
-                document.getElementById('tax2'+l).value = val
+                document.getElementById('tax'+l).value = val
             }
         }
         calc()
@@ -1447,6 +1433,7 @@
                     </td>
                 </tr>`
             );
+            productsearch(roinc)
         });
     });
     

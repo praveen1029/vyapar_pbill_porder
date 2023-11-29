@@ -464,7 +464,7 @@
                                                                 <option value="GST3[3%]">GST3[3%]</option>
                                                                 <option value="GST5[5%]">GST5[5%]</option>
                                                                 <option value="GST12[12%]">GST12[12%]</option>
-                                                                <option value="GST13[18%]">GST18[18%]</option>
+                                                                <option value="GST18[18%]">GST18[18%]</option>
                                                                 <option value="GST28[28%]">GST28[28%]</option>
                                                                 </select>
                                                             </div>
@@ -907,7 +907,6 @@
                     return '<div>' + escape(item.text) + '</div>';
                 }
             }
-
         });
     });
 
@@ -923,9 +922,22 @@
                     return '<div>' + escape(item.text) + '</div>';
                 }
             }
-
         });
     });
+
+    function productsearch(roinc){
+        $(`#product${roinc}`).selectize({
+            sortField: 'value',
+            render: {
+                item: function (item, escape) {
+                    if (item.value === '') {
+                        return '';
+                    }
+                    return '<div>' + escape(item.text) + '</div>';
+                }
+            }
+        });
+    }
 </script>
 
 <script>
@@ -1036,15 +1048,8 @@
     })
 </script>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.13.3/js/standalone/selectize.min.js"></script>
-
 <script>
     $(document).on("change", "#plosu", function(){
-        var taxes = document.getElementsByClassName('seltax');
-        for (var i = 0; i < taxes.length; i++) {
-            taxes[i].style.display = 'none';
-        }
         var table = document.getElementById("items-table-body");
         var numberOfRows = table.rows.length;
         var bc = document.getElementById("plosu").value;
@@ -1315,6 +1320,7 @@
                     </td>
                 </tr>`
             );
+            productsearch(roinc)
         });
     });
 
